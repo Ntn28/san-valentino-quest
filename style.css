@@ -65,15 +65,15 @@ input {
     cursor: pointer;
     
     /* MODIFICA QUESTI VALORI */
-    width: 250px;  /* Prova con 250px o 300px */
-    height: 250px; /* Mantienilo quadrato o rettangolare come preferisci */
+    width: 550px;  /* Prova con 250px o 300px */
+    height: 550px; /* Mantienilo quadrato o rettangolare come preferisci */
 
 }
 
 /* Esempio posizioni (Dovrai aggiustarle tu!) */
 #spot-mole { top: 50%; left: 50%; }
 #spot-cappuccini { top: 10%; left: 80%; }
-#spot-egizio { top:90%; left: 25%; }
+#spot-egizio { top:95%; left: 25%; }
 #spot-smashy { top: 80%; left: 50%; }
 
 /* Stile Livelli */
