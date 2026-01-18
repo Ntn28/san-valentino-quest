@@ -41,33 +41,40 @@ input {
 #error-msg { color: red; font-weight: bold; }
 
 /* Stile Mappa (Scrollabile) */
+/* Contenitore principale che occupa tutto lo schermo */
 #map-screen {
-    display: block; /* Override del flex per permettere lo scroll */
-    overflow: auto; /* Permette di scorrere la mappa gigante */
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden; /* Nascondiamo le scrollbar classiche */
     cursor: grab;
+    background-color: #333;
+    position: relative;
 }
 
+#map-screen:active {
+    cursor: grabbing;
+}
+
+/* Il contenitore della mappa si adatta all'immagine */
 .map-container {
-    position: relative; /* Fondamentale per posizionare gli hotspot */
-    width: 2000px; /* Larghezza ipotetica della tua immagine grande */
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: inline-block;
+    user-select: none; /* Impedisce di evidenziare l'immagine mentre trascini */
 }
 
 .game-map {
-    width: 100%;
     display: block;
+    height: auto;
+    max-width: none; /* Permette all'immagine di essere più grande dello schermo */
 }
 
-/* Nel file style.css */
 .hotspot {
     position: absolute;
-    border: 2px solid red; 
-    background-color: rgba(255, 0, 0, 0.2); 
-    cursor: pointer;
-    
-    /* MODIFICA QUESTI VALORI */
-    width: 550px;  /* Prova con 250px o 300px */
-    height: 550px; /* Mantienilo quadrato o rettangolare come preferisci */
-
+    border: 2px solid red;
+    background-color: rgba(255, 0, 0, 0.3);
+    z-index: 10;
 }
 
 /* Esempio posizioni (Dovrai aggiustarle tu!) */
