@@ -67,9 +67,9 @@ input {
 }
 
 /* Esempio posizioni (Dovrai aggiustarle tu!) */
-#spot-mole { top: 40%; left: 50%; }
-#spot-cappuccini { top: 10%; left: 70%; }
-#spot-egizio { top: 60%; left: 30%; }
+#spot-mole { top: 50%; left: 50%; }
+#spot-cappuccini { top: 10%; left: 80%; }
+#spot-egizio { top:80%; left: 25%; }
 #spot-smashy { top: 80%; left: 50%; }
 
 /* Stile Livelli */
