@@ -32,14 +32,17 @@
         </div>
     </div>
 
-    <div id="level-screen" class="screen hidden">
-        <button class="back-btn" onclick="closeLevel()">⬅ Torna alla Mappa</button>
-        <div class="level-container">
-            <img id="level-image" src="" alt="Livello">
-            <div id="hidden-objects-container">
-                </div>
-        </div>
+   <div id="level-screen" class="screen hidden">
+    <button class="back-btn" onclick="closeLevel()">⬅ Torna alla Mappa</button>
+    
+    <div class="map-container" id="level-drag-container">
+        <img id="level-image" src="" alt="Livello" draggable="false">
+        <div id="interactive-objects"></div>
     </div>
+
+    <div id="objects-to-find">
+        </div>
+</div>
 
     <script src="script.js"></script>
 </body>
