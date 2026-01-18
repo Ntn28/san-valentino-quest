@@ -57,19 +57,23 @@ input {
     display: block;
 }
 
-/* Hotspots (Aree cliccabili trasparenti) */
+/* Nel file style.css */
 .hotspot {
     position: absolute;
-    border: 2px solid red; /* Metti 'none' quando hai finito di posizionarli */
-    background-color: rgba(255, 0, 0, 0.2); /* Metti opacity 0 alla fine */
+    border: 2px solid red; 
+    background-color: rgba(255, 0, 0, 0.2); 
     cursor: pointer;
-    width: 100px; height: 100px; /* Dimensione default */
+    
+    /* MODIFICA QUESTI VALORI */
+    width: 250px;  /* Prova con 250px o 300px */
+    height: 250px; /* Mantienilo quadrato o rettangolare come preferisci */
+
 }
 
 /* Esempio posizioni (Dovrai aggiustarle tu!) */
 #spot-mole { top: 50%; left: 50%; }
 #spot-cappuccini { top: 10%; left: 80%; }
-#spot-egizio { top:80%; left: 25%; }
+#spot-egizio { top:90%; left: 25%; }
 #spot-smashy { top: 80%; left: 50%; }
 
 /* Stile Livelli */
