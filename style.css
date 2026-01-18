@@ -78,14 +78,14 @@ input {
 }
 
 /* Esempio posizioni (Dovrai aggiustarle tu!) */
-#spot-mole { top: 45%; left: 45%; width: 400px; 
-    height: 400px;}
-#spot-cappuccini { top: 5%; left: 80%; width: 400px; 
-    height: 400px;}
-#spot-egizio { top:45%; left: 80%; width: 400px; 
+#spot-mole { top: 51.95%; left: 49.1%; width: 200px; 
     height: 200px;}
-#spot-smashy { top: 80%; left: 50%; width: 400px; 
-    height: 400px;}
+#spot-cappuccini { top: 13.18%; left: 81.84%; width: 200px; 
+    height: 200px;}
+#spot-egizio { top:5.74%; left: 7.24%; width: 200px; 
+    height: 200px;}
+#spot-smashy { top: 82.1%; left: 51.07%; width: 200px; 
+    height: 200px;}
 
 /* Stile Livelli */
 .back-btn {
