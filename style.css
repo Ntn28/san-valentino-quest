@@ -71,10 +71,14 @@ input {
 }
 
 /* Esempio posizioni (Dovrai aggiustarle tu!) */
-#spot-mole { top: 50%; left: 50%; }
-#spot-cappuccini { top: 10%; left: 80%; }
-#spot-egizio { top:95%; left: 25%; }
-#spot-smashy { top: 80%; left: 50%; }
+#spot-mole { top: 50%; left: 50%; width: 400px; 
+    height: 400px;}
+#spot-cappuccini { top: 10%; left: 80%; width: 400px; 
+    height: 400px;}
+#spot-egizio { top:20%; left: 90%; width: 400px; 
+    height: 120px;}
+#spot-smashy { top: 80%; left: 50%; width: 400px; 
+    height: 400px;}
 
 /* Stile Livelli */
 .back-btn {
