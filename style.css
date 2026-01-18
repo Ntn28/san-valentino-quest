@@ -1,0 +1,84 @@
+body {
+    font-family: 'Courier New', Courier, monospace;
+    margin: 0;
+    overflow: hidden; /* Evita scroll indesiderati sulla pagina principale */
+    background-color: #f0f0f0;
+    text-align: center;
+}
+
+/* Gestione Schermate */
+.screen {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    transition: opacity 0.5s;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Stile Login */
+.input-group {
+    margin: 20px;
+    font-size: 24px;
+}
+input {
+    font-size: 24px;
+    padding: 10px;
+    text-align: center;
+    border: 2px solid black;
+    border-radius: 5px;
+}
+#slot-day, #slot-month { width: 50px; }
+#slot-year { width: 100px; }
+
+#error-msg { color: red; font-weight: bold; }
+
+/* Stile Mappa (Scrollabile) */
+#map-screen {
+    display: block; /* Override del flex per permettere lo scroll */
+    overflow: auto; /* Permette di scorrere la mappa gigante */
+    cursor: grab;
+}
+
+.map-container {
+    position: relative; /* Fondamentale per posizionare gli hotspot */
+    width: 2000px; /* Larghezza ipotetica della tua immagine grande */
+}
+
+.game-map {
+    width: 100%;
+    display: block;
+}
+
+/* Hotspots (Aree cliccabili trasparenti) */
+.hotspot {
+    position: absolute;
+    border: 2px solid red; /* Metti 'none' quando hai finito di posizionarli */
+    background-color: rgba(255, 0, 0, 0.2); /* Metti opacity 0 alla fine */
+    cursor: pointer;
+    width: 100px; height: 100px; /* Dimensione default */
+}
+
+/* Esempio posizioni (Dovrai aggiustarle tu!) */
+#spot-mole { top: 40%; left: 50%; }
+#spot-cappuccini { top: 10%; left: 70%; }
+#spot-egizio { top: 60%; left: 30%; }
+#spot-smashy { top: 80%; left: 50%; }
+
+/* Stile Livelli */
+.back-btn {
+    position: fixed;
+    top: 20px; left: 20px;
+    z-index: 100;
+    padding: 10px 20px;
+    background: black;
+    color: white;
+    cursor: pointer;
+}
