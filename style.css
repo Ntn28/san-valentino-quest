@@ -46,17 +46,63 @@ input {
 .map-container {
     position: absolute;
     top: 0; left: 0;
+    width: 200vw; /* Raddoppia la larghezza */
     display: inline-block;
-    /* Impedisce di trascinare l'immagine come file */
-    user-select: none; 
+    user-select: none;
     -webkit-user-drag: none;
 }
 
 .game-map {
+    width: 100%; /* Copre tutto il contenitore (che è 200vw) */
     display: block;
-    max-width: none;
+    pointer-events: none;
+}
+
+/* Stile per il livello (sotto-mappa) */
+#level-screen {
+    background-color: #f8f8f8;
+}
+
+.level-container {
+    position: relative;
+    width: 150vw; /* Anche i livelli sono più grandi dello schermo */
+    height: 150vh;
+    cursor: grab;
+}
+
+#level-image {
+    width: 100%;
     height: auto;
-    pointer-events: none; /* Impedisce interferenze col drag */
+}
+
+/* Barra degli oggetti da trovare (stile Hidden Folks) */
+#objects-to-find {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.9);
+    border-top: 3px solid black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    z-index: 2000;
+}
+
+.target-item {
+    width: 60px;
+    height: 60px;
+    border: 2px dashed #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+}
+
+.target-item.found {
+    border: 2px solid green;
+    background-color: rgba(0, 255, 0, 0.2);
 }
 
 /* HOTSPOTS */
