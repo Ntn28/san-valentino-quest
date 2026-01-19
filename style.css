@@ -36,38 +36,33 @@ input {
     height: 100vh;
     overflow: hidden;
     position: relative;
+    background-color: #000;
     cursor: grab;
-    background-color: #000; /* Sarà visibile solo se l'immagine è più piccola dello schermo */
 }
 
 .map-container {
     position: absolute;
     top: 0;
     left: 0;
-    /* IMPOSTA QUI LA GRANDEZZA "ZOOM" */
-    /* Più aumenti questo numero, più sarai zoomato dentro l'immagine */
-    width: 4000px; 
+    transform-origin: 0 0; /* Fondamentale per non sballare i calcoli */
     display: inline-block;
+}
+
+.game-map {
+    display: block;
+    width: auto;   /* Usa la dimensione originale dell'immagine */
+    height: 100vh; /* O quello che preferisci come altezza base */
     user-select: none;
     -webkit-user-drag: none;
 }
 
-.game-map {
-    width: 100%; /* L'immagine riempie i 4000px del contenitore */
-    height: auto;
-    display: block;
-    pointer-events: none;
-}
-
-/* HOTSPOTS: restano perfetti perché usano le % della larghezza della mappa */
 .hotspot {
     position: absolute;
     z-index: 10;
     cursor: pointer;
-    border: 2px solid red; /* Metti 'none' alla fine */
-    background-color: rgba(255, 0, 0, 0.2); /* Metti 'transparent' alla fine */
+    border: 2px solid red; /* Metti none quando hai finito */
+    background-color: rgba(255, 0, 0, 0.2);
 }
-
 #spot-mole { top: 44.63%; left: 39.75%; width: 200px; height: 200px; }
 #spot-cappuccini { top: 3.12%; left: 71.58%; width: 200px; height: 200px; }
 #spot-egizio { top: 30%; left: 62.11%; width: 200px; height: 200px; }
