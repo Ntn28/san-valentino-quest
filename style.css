@@ -32,36 +32,40 @@ input {
 
 /* MAPPA */
 #map-screen {
-    width: 100vw; height: 100vh;
+    width: 100vw;
+    height: 100vh;
     overflow: hidden;
     position: relative;
     cursor: grab;
-    background-color: #000;
+    background-color: #000; /* Sarà visibile solo se l'immagine è più piccola dello schermo */
 }
-#map-screen:active { cursor: grabbing; }
 
 .map-container {
     position: absolute;
-    top: 0; left: 0;
+    top: 0;
+    left: 0;
+    /* IMPOSTA QUI LA GRANDEZZA "ZOOM" */
+    /* Più aumenti questo numero, più sarai zoomato dentro l'immagine */
+    width: 4000px; 
     display: inline-block;
     user-select: none;
     -webkit-user-drag: none;
 }
 
 .game-map {
-    display: block;
-    max-width: none; /* Importante per mantenere la dimensione originale */
+    width: 100%; /* L'immagine riempie i 4000px del contenitore */
     height: auto;
+    display: block;
     pointer-events: none;
 }
 
-/* HOTSPOTS (Quelli che hai già settato) */
+/* HOTSPOTS: restano perfetti perché usano le % della larghezza della mappa */
 .hotspot {
     position: absolute;
     z-index: 10;
     cursor: pointer;
-    border: 2px solid red; 
-    background-color: rgba(255, 0, 0, 0.2);
+    border: 2px solid red; /* Metti 'none' alla fine */
+    background-color: rgba(255, 0, 0, 0.2); /* Metti 'transparent' alla fine */
 }
 
 #spot-mole { top: 44.63%; left: 39.75%; width: 200px; height: 200px; }
