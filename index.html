@@ -3,46 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Torino Map</title>
+    <title>Torino Hidden Map</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div id="login-screen" class="screen active">
-        <h1>What's the PASSWORD</h1>
+        <h1 style="color: white; text-shadow: 2px 2px black;">Inserisci la Data Speciale</h1>
         <div class="input-group">
-            <input type="text" id="slot-day" maxlength="2" placeholder="c:" autofocus>
-            <span>/</span>
-            <input type="text" id="slot-month" maxlength="2" placeholder="c:">
-            <span>/</span>
-            <input type="text" id="slot-year" maxlength="4" placeholder="ccc:">
+            <input type="text" id="slot-day" maxlength="2" placeholder="GG">
+            <span style="color:white">/</span>
+            <input type="text" id="slot-month" maxlength="2" placeholder="MM">
+            <span style="color:white">/</span>
+            <input type="text" id="slot-year" maxlength="4" placeholder="AAAA">
         </div>
-        <button onclick="checkCode()">hehehe</button>
-        <p id="error-msg" class="hidden">Nope! Riprova.</p>
+        <button onclick="checkCode()" style="padding: 10px 30px; cursor:pointer;">ENTRA ❤️</button>
+        <p id="error-msg" class="hidden">Riprova, amore!</p>
     </div>
 
     <div id="map-screen" class="screen hidden"> 
         <div class="map-container">
             <img src="mappa.png" alt="Mappa Torino" class="game-map">
-            
             <div class="hotspot" id="spot-mole" onclick="openLevel('mole')"></div>
-            <div class="hotspot" id="spot-cappuccini" onclick="openLevel('cappuccini')"></div>
             <div class="hotspot" id="spot-egizio" onclick="openLevel('egizio')"></div>
             <div class="hotspot" id="spot-smashy" onclick="openLevel('smashy')"></div>
         </div>
     </div>
 
    <div id="level-screen" class="screen hidden">
-    <button class="back-btn" onclick="closeLevel()">⬅ Torna alla Mappa</button>
-    
-    <div class="map-container" id="level-drag-container">
-        <img id="level-image" src="" alt="Livello" draggable="false">
-        <div id="interactive-objects"></div>
-    </div>
-
-    <div id="objects-to-find">
+        <button class="back-btn" onclick="closeLevel()">⬅ Torna alla Mappa</button>
+        <div class="map-container" id="level-drag-container">
+            <img id="level-image" src="" alt="Livello" draggable="false">
+            <div id="interactive-objects"></div>
         </div>
-</div>
+        <div id="objects-to-find"></div>
+    </div>
 
     <script src="script.js"></script>
 </body>
