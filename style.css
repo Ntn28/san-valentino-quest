@@ -4,38 +4,22 @@ body {
     background-color: #1a1a1a;
 }
 
-/* --- LOGIN SCREEN --- */
-#login-screen {
-    background: radial-gradient(circle at center, #ff1a1a 0%, #4d0000 100%);
-    background-size: 200% 200%;
-    animation: moveGradient 8s ease infinite;
-    z-index: 1000;
-}
-@keyframes moveGradient {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-.heart {
-    position: absolute;
-    color: rgba(255, 0, 0, 0.7);
-    pointer-events: none;
-    filter: drop-shadow(0 0 15px rgba(255,0,0,0.8));
-    animation: floatHeart 7s linear infinite;
-}
-@keyframes floatHeart {
-    0% { transform: translateY(110vh) scale(0.5) rotate(0deg); opacity: 0; }
-    100% { transform: translateY(-20vh) scale(2) rotate(360deg); opacity: 0; }
-}
-
-/* --- MAPPA E ZOOM --- */
+/* --- LOGIN SCREEN (FIX CENTRAGGIO) --- */
 .screen {
     position: fixed; top: 0; left: 0;
     width: 100vw; height: 100vh;
     display: flex; flex-direction: column;
+    align-items: center; justify-content: center; /* Centra tutto */
 }
-.hidden { display: none !important; }
+#login-screen {
+    background: radial-gradient(circle at center, #ff1a1a 0%, #4d0000 100%);
+    z-index: 1000;
+}
+.input-group { margin: 20px 0; }
+input { padding: 10px; width: 50px; text-align: center; border-radius: 5px; border: none; }
 
+/* --- MAPPA E ZOOM --- */
+.hidden { display: none !important; }
 #map-screen { background-color: #000; cursor: grab; }
 .map-container {
     position: absolute; top: 0; left: 0;
@@ -44,52 +28,53 @@ body {
 }
 .game-map, #level-image {
     display: block; width: auto; height: 100vh;
-    user-select: none; -webkit-user-drag: none;
 }
 
-/* Hotspot Mappa Principale */
+/* Hotspot Ingressi (Regolati) */
 .hotspot-trigger {
     position: absolute; z-index: 20; cursor: pointer;
-    border: 3px solid rgba(255, 0, 0, 0.5);
-    background: rgba(255, 0, 0, 0.2);
+    border: 3px solid rgba(255, 0, 0, 0.4);
+    background: rgba(255, 0, 0, 0.1);
     border-radius: 50%;
 }
-#spot-mole { top: 44.63%; left: 39.75%; width: 80px; height: 80px; }
-#spot-egizio { top: 30%; left: 62.11%; width: 80px; height: 80px; }
-#spot-smashy { top: 71.97%; left: 40.23%; width: 80px; height: 80px; }
+#spot-mole { top: 44.63%; left: 39.75%; width: 100px; height: 100px; }
+#spot-egizio { top: 30%; left: 62.11%; width: 100px; height: 100px; }
+#spot-smashy { top: 71.97%; left: 40.23%; width: 100px; height: 100px; }
 
-/* --- UI OGGETTI (BASSA E NON INVADENTE) --- */
+/* --- BARRA OGGETTI A COMPARSA --- */
 #objects-to-find {
-    position: fixed; bottom: 0; width: 100%; height: 90px; /* Ridotta */
-    background: rgba(255, 255, 255, 0.9);
-    border-top: 3px solid #ff1a1a;
+    position: fixed; bottom: 0; width: 100%; height: 100px;
+    background: rgba(255, 255, 255, 0.95);
+    border-top: 5px solid #ff1a1a;
     display: flex; justify-content: flex-start; align-items: center;
-    gap: 10px; z-index: 2000; overflow-x: auto; padding: 0 15px;
+    gap: 15px; z-index: 2000; overflow-x: auto; padding: 0 20px;
+    
+    /* Animazione a comparsa */
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform: translateY(90px); /* Esce quasi tutta */
+}
+#objects-to-find:hover {
+    transform: translateY(0); /* Sale quando passi il mouse */
 }
 .target-item {
-    min-width: 70px; height: 75px; 
-    border: 1px dashed #ff1a1a;
+    min-width: 80px; height: 85px; border: 1px solid #ddd;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    background: white; border-radius: 8px;
+    background: white; border-radius: 8px; flex-shrink: 0;
+    transition: opacity 0.3s;
 }
-.target-item img {
-    max-width: 50px; max-height: 45px; 
-    object-fit: contain; /* FIX STRETCH */
-}
-.target-item span { font-size: 9px; text-align: center; margin-top: 2px; }
+.target-item img { max-width: 50px; max-height: 50px; object-fit: contain; }
+.target-item span { font-size: 9px; margin-top: 3px; }
+.target-item.found { opacity: 0.2; background: #ccffcc; }
 
-/* --- DEBUG PANEL --- */
-#debug-panel {
-    position: fixed; top: 10px; right: 10px;
-    background: rgba(0,0,0,0.9); color: #fff;
-    padding: 10px; z-index: 3000; border-radius: 8px;
-    max-height: 60vh; overflow-y: auto; font-size: 11px;
-    width: 150px; border: 1px solid #0f0;
+/* Feedback quando trovi un oggetto */
+.found-marker {
+    position: absolute; width: 50px; height: 50px;
+    border: 4px solid #00ff00; border-radius: 50%;
+    pointer-events: none; z-index: 100;
+    transform: translate(-50%, -50%);
+    animation: foundPop 0.5s ease-out;
 }
-.debug-item { cursor: pointer; padding: 3px; border-bottom: 1px solid #333; }
-.debug-item:hover { background: #333; }
-.hotspot-debug {
-    position: absolute; z-index: 15;
-    border: 2px solid #0f0; background: rgba(0, 255, 0, 0.3);
-    pointer-events: none; border-radius: 5px;
+@keyframes foundPop {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 }
