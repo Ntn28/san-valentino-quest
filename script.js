@@ -1,5 +1,5 @@
 let isDragging = false;
-let hasMoved = false; // Nuova variabile per distinguere click da drag
+let hasMoved = false; 
 let startX, startY;
 let mapX = 0, mapY = 0, scale = 1;
 let activeContainer = null;
@@ -11,7 +11,7 @@ const levelsData = {
     'mole': { image: 'mole_interno.png', targets: ["Take a bite", "Cartolina", "Piuma", "Bandiera", "Salvadanaio", "Aereoplanino", "Binocolo", "Pop corn", "Robot", "Cappello", "Lucchetto", "Treno", "Oscar"] }
 };
 
-// --- LOGIN & CUORI (Invariati) ---
+// --- LOGIN & CUORI ---
 function createHearts() {
     const container = document.getElementById('login-screen');
     setInterval(() => {
@@ -19,11 +19,11 @@ function createHearts() {
         const heart = document.createElement('div');
         heart.className = 'heart'; heart.innerHTML = '❤️';
         heart.style.left = Math.random() * 100 + 'vw';
-        heart.style.fontSize = Math.random() * 50 + 20 + 'px';
+        heart.style.fontSize = Math.random() * 40 + 20 + 'px';
         heart.style.animationDuration = Math.random() * 3 + 4 + 's';
         container.appendChild(heart);
         setTimeout(() => heart.remove(), 7000);
-    }, 300);
+    }, 400);
 }
 createHearts();
 
@@ -39,7 +39,7 @@ function checkCode() {
     } else { alert("Data errata!"); }
 }
 
-// --- CAMERA ---
+// --- CAMERA & ZOOM ---
 function initCamera(resetZoom = false) {
     if (!activeContainer) return;
     const screenW = window.innerWidth, screenH = window.innerHeight;
@@ -69,7 +69,7 @@ function applyTransform() {
 window.addEventListener('wheel', (e) => {
     if (!activeContainer) return;
     e.preventDefault();
-    const zoomSpeed = 0.1;
+    const zoomSpeed = 0.12;
     const oldScale = scale;
     let newScale = e.deltaY < 0 ? scale * (1 + zoomSpeed) : scale / (1 + zoomSpeed);
     const screenW = window.innerWidth, screenH = window.innerHeight;
@@ -85,18 +85,17 @@ window.addEventListener('wheel', (e) => {
     }
 }, { passive: false });
 
-// --- GESTIONE DRAG VS CLICK ---
+// --- GESTIONE MOVIMENTO ---
 window.addEventListener('mousedown', (e) => {
     if (!activeContainer || e.button !== 0) return;
     isDragging = true;
-    hasMoved = false; // Resettiamo il movimento
+    hasMoved = false; 
     startX = e.clientX - mapX;
     startY = e.clientY - mapY;
 });
 
 window.addEventListener('mousemove', (e) => {
     if (!isDragging || !activeContainer) return;
-    // Se muoviamo il mouse di più di 5 pixel, consideralo un trascinamento
     if (Math.abs(e.clientX - (startX + mapX)) > 5 || Math.abs(e.clientY - (startY + mapY)) > 5) {
         hasMoved = true;
     }
@@ -105,11 +104,9 @@ window.addEventListener('mousemove', (e) => {
     applyTransform();
 });
 
-window.addEventListener('mouseup', () => {
-    setTimeout(() => { isDragging = false; }, 50); // Piccolo delay per non triggerare click
-});
+window.addEventListener('mouseup', () => { isDragging = false; });
 
-// --- LOGICA LIVELLI ---
+// --- LIVELLI ---
 function openLevel(placeName) {
     const data = levelsData[placeName];
     const levelImg = document.getElementById('level-image');
@@ -131,28 +128,29 @@ function setupObjects(targets) {
         const id = name.toLowerCase().replace(/ /g, '_').replace(/'/g, '');
         const slot = document.createElement('div');
         slot.className = 'target-item';
-        slot.id = `tray-${id}`;
         slot.innerHTML = `<img src="assets/${id}.png" onerror="this.src='https://via.placeholder.com/50?text=?'"><span>${name}</span>`;
         tray.appendChild(slot);
     });
 }
 
-// --- DEBUG TOOL MIGLIORATO ---
+// --- DEBUG TOOL CORRETTO ---
 function setupDebug(targets) {
-    let panel = document.getElementById('debug-panel') || document.createElement('div');
-    panel.id = 'debug-panel';
-    document.body.appendChild(panel);
-    panel.innerHTML = '<b>DEBUG MODE</b><br><small>Seleziona un nome per attivare il click</small><hr>';
+    let panel = document.getElementById('debug-panel');
+    if (!panel) {
+        panel = document.createElement('div');
+        panel.id = 'debug-panel';
+        document.body.appendChild(panel);
+    }
+    panel.innerHTML = '<b style="color:white">DEBUG: Scegli oggetto</b><hr>';
     targets.forEach(name => {
         const dObj = document.createElement('div');
         dObj.className = 'debug-obj-item';
-        dObj.style.cursor = "pointer";
         dObj.innerText = "• " + name;
         dObj.onclick = (e) => {
             e.stopPropagation();
-            document.querySelectorAll('.debug-obj-item').forEach(el => el.style.color = 'white');
-            dObj.style.color = '#0f0';
-            currentObjectToPlace = name; // Attiva il puntatore per questo oggetto
+            document.querySelectorAll('.debug-obj-item').forEach(el => el.classList.remove('selected'));
+            dObj.classList.add('selected');
+            currentObjectToPlace = name; 
         };
         panel.appendChild(dObj);
     });
@@ -160,7 +158,6 @@ function setupDebug(targets) {
 
 // Click sulla scena per salvare
 document.getElementById('level-image').addEventListener('click', function(e) {
-    // SE sto trascinando O NON ho selezionato un oggetto dalla lista, NON FARE NULLA
     if (hasMoved || !currentObjectToPlace) return;
 
     const rect = this.getBoundingClientRect();
@@ -169,25 +166,31 @@ document.getElementById('level-image').addEventListener('click', function(e) {
     const topPct = ((y / this.offsetHeight) * 100).toFixed(2);
     const leftPct = ((x / this.offsetWidth) * 100).toFixed(2);
 
+    // Stampa il codice pronto da copiare
     console.log(`{ id: '${currentObjectToPlace.toLowerCase().replace(/ /g, '_')}', name: '${currentObjectToPlace}', top: '${topPct}%', left: '${leftPct}%' },`);
     
+    // Mostra un marker visivo
     const marker = document.createElement('div');
     marker.className = 'hotspot-debug';
     marker.style.top = topPct + "%"; marker.style.left = leftPct + "%";
-    marker.style.width = "30px"; marker.style.height = "30px";
-    marker.style.transform = "translate(-50%, -50%)"; // Centra il marker nel punto esatto
+    marker.style.width = "20px"; marker.style.height = "20px";
+    marker.style.background = "lime";
+    marker.style.position = "absolute";
+    marker.style.transform = "translate(-50%, -50%)";
+    marker.style.borderRadius = "50%";
+    marker.style.pointerEvents = "none";
     document.getElementById('interactive-objects').appendChild(marker);
     
-    alert(`Salvato: ${currentObjectToPlace}`);
-
-    // RESET: Dopo il salvataggio, devi cliccare un altro oggetto dalla lista per salvare ancora
+    // RESET: devi selezionarne un altro dal pannello
     currentObjectToPlace = null;
-    document.querySelectorAll('.debug-obj-item').forEach(el => el.style.color = 'white');
+    document.querySelectorAll('.debug-obj-item').forEach(el => el.classList.remove('selected'));
 });
 
 function closeLevel() {
     document.getElementById('level-screen').classList.add('hidden');
     document.getElementById('map-screen').classList.remove('hidden');
+    const panel = document.getElementById('debug-panel');
+    if(panel) panel.remove(); // Rimuovi debug quando esci
     activeContainer = document.querySelector('#map-screen .map-container');
     initCamera(true);
 }
