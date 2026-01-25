@@ -4,36 +4,38 @@ body {
     background-color: #1a1a1a;
 }
 
-/* --- LOGIN SCREEN "VIVA" --- */
+/* --- LOGIN SCREEN VIVA --- */
 #login-screen {
-    background: radial-gradient(circle, #ff1a1a, #800000);
+    background: radial-gradient(circle at center, #ff1a1a 0%, #4d0000 100%);
     background-size: 200% 200%;
-    animation: pulseBG 5s ease-in-out infinite;
-    z-index: 1000;
+    animation: moveGradient 8s ease infinite;
 }
 
-@keyframes pulseBG {
-    0%, 100% { background-size: 100% 100%; }
-    50% { background-size: 120% 120%; }
+@keyframes moveGradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .heart {
     position: absolute;
-    color: rgba(255, 50, 50, 0.6);
+    color: rgba(255, 0, 0, 0.7);
     user-select: none;
     pointer-events: none;
-    filter: drop-shadow(0 0 10px rgba(255,0,0,0.5));
-    animation: floatHeart 8s linear infinite;
+    filter: drop-shadow(0 0 15px rgba(255,0,0,0.8));
+    animation: floatHeart 7s linear infinite;
+    z-index: 1;
 }
 
 @keyframes floatHeart {
     0% { transform: translateY(110vh) scale(0.5) rotate(0deg); opacity: 0; }
-    20% { opacity: 0.8; }
-    80% { opacity: 0.8; }
-    100% { transform: translateY(-20vh) scale(1.5) rotate(360deg); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translateY(-20vh) scale(2) rotate(360deg); opacity: 0; }
 }
 
-/* --- MAPPA --- */
+.login-content { position: relative; z-index: 10; color: white; }
+
+/* --- MAPPA E ZOOM --- */
 .screen {
     position: fixed; top: 0; left: 0;
     width: 100vw; height: 100vh;
@@ -47,38 +49,40 @@ body {
 
 .map-container {
     position: absolute; top: 0; left: 0;
-    transform-origin: 0 0; /* Necessario per il calcolo dello zoom sul mouse */
+    transform-origin: 0 0; /* Punto di perno per lo zoom */
     display: inline-block;
+    will-change: transform; /* Ottimizza le prestazioni dello zoom */
 }
 
 .game-map {
-    display: block; width: auto; height: 100vh; /* Altezza base */
+    display: block; width: auto; height: 100vh;
     user-select: none; -webkit-user-drag: none;
 }
 
-/* Hotspots di debug */
+/* Hotspots */
 .hotspot {
-    position: absolute; z-index: 10;
+    position: absolute; z-index: 10; cursor: pointer;
     border: 2px solid cyan; background: rgba(0, 255, 255, 0.1);
 }
 
-/* --- UI --- */
+/* --- UI OGGETTI --- */
 #objects-to-find {
-    position: fixed; bottom: 0; width: 100%; height: 120px;
-    background: rgba(255, 255, 255, 0.95);
-    border-top: 4px solid #800000;
-    display: flex; justify-content: center; align-items: center;
-    gap: 15px; z-index: 2000; overflow-x: auto;
+    position: fixed; bottom: 0; width: 100%; height: 130px;
+    background: rgba(255, 255, 255, 0.9);
+    border-top: 5px solid #ff1a1a;
+    display: flex; justify-content: flex-start; align-items: center;
+    gap: 15px; z-index: 2000; overflow-x: auto; padding: 0 20px;
 }
 
 .target-item {
-    min-width: 90px; height: 100px; border: 2px dashed #888;
+    min-width: 100px; height: 110px; border: 2px dashed #ff1a1a;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: white; border-radius: 10px;
 }
 
 #debug-panel {
     position: fixed; top: 10px; right: 10px;
     background: rgba(0,0,0,0.9); color: #0f0;
     padding: 15px; z-index: 3000; border-radius: 10px;
-    font-family: monospace; font-size: 12px;
+    max-height: 70vh; overflow-y: auto; font-size: 11px;
 }
