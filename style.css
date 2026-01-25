@@ -65,6 +65,32 @@ body {
     border: 2px solid cyan; background: rgba(0, 255, 255, 0.1);
 }
 
+/* ... (tutto il resto del CSS precedente dei cuori e login) ... */
+
+/* Hotspot Mappa Principale (Ingressi livelli) */
+.hotspot-trigger {
+    position: absolute;
+    z-index: 20;
+    cursor: pointer;
+    border: 3px solid red; /* Visibile per ora */
+    background: rgba(255, 0, 0, 0.2);
+    border-radius: 50%;
+}
+
+/* Posizioni specifiche sulla mappa principale */
+#spot-mole { top: 44.63%; left: 39.75%; width: 120px; height: 120px; }
+#spot-egizio { top: 30%; left: 62.11%; width: 120px; height: 120px; }
+#spot-smashy { top: 71.97%; left: 40.23%; width: 120px; height: 120px; }
+
+/* Hotspot Debug (dentro i livelli) */
+.hotspot-debug {
+    position: absolute;
+    z-index: 15;
+    border: 2px solid cyan;
+    background: rgba(0, 255, 255, 0.3);
+    pointer-events: none; /* Non blocca il click per il debug */
+}
+
 /* --- UI OGGETTI --- */
 #objects-to-find {
     position: fixed; bottom: 0; width: 100%; height: 130px;
