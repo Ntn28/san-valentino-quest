@@ -21,13 +21,16 @@ input { padding: 10px; width: 50px; text-align: center; border-radius: 5px; bord
 .game-map, #level-image { display: block; width: auto; height: 100vh; user-select: none; }
 
 /* Collider Mappa (Ingranditi e spostati a destra/basso) */
+/* Hotspot Ingressi (Ora invisibili) */
 .hotspot-trigger {
-    position: absolute; z-index: 20; cursor: pointer;
-    border: 3px solid rgba(255, 0, 0, 0.3);
-    background: rgba(255, 0, 0, 0.1);
+    position: absolute; 
+    z-index: 20; 
+    cursor: pointer;
+    border: none;       /* Rimosso bordo */
+    background: none;   /* Rimosso colore */
     border-radius: 50%;
 }
-/* Spostati leggermente a destra e in basso rispetto a prima */
+/* Le posizioni restano le stesse, ma non si vedono */
 #spot-mole { top: 46%; left: 41%; width: 130px; height: 130px; }
 #spot-egizio { top: 32%; left: 64%; width: 130px; height: 130px; }
 #spot-smashy { top: 73%; left: 42%; width: 130px; height: 130px; }
