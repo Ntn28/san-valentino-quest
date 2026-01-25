@@ -18,8 +18,9 @@ const levelsData = {
             { id: 'cappello', name: 'Cappello', top: 7.23, left: 36.95 },
             { id: 'lucchetto', name: 'Lucchetto', top: 21.63, left: 69.77 },
             { id: 'treno', name: 'Treno', top: 12.47, left: 62.16 },
-            { id: 'oscar', name: 'Oscar', top: 50.62, left: 2.50 }
-            // Qui aggiungeremo Binocolo e Film appena mi passi le coordinate!
+            { id: 'oscar', name: 'Oscar', top: 50.62, left: 2.50 },
+            { id: 'binocolo', name: 'Binocolo', top: 25.84, left: 79.81 }, // AGGIUNTO
+            { id: 'film', name: 'Film', top: 87.17, left: 92.77 }          // AGGIUNTO
         ]
     },
     'smashy': {
@@ -63,7 +64,7 @@ const levelsData = {
     }
 };
 
-// --- CAMERA ENGINE (Fixato per mappe indipendenti) ---
+// --- CAMERA ENGINE ---
 function checkCode() {
     const d = document.getElementById('slot-day').value;
     const m = document.getElementById('slot-month').value;
@@ -102,7 +103,7 @@ function applyTransform() {
     activeContainer.style.transform = `translate(${mapX}px, ${mapY}px) scale(${scale})`;
 }
 
-// Eventi Mouse
+// Eventi Mouse - AGGIUNTO window per il mouseup così non si incastra
 window.addEventListener('wheel', (e) => {
     if (!activeContainer) return;
     e.preventDefault();
@@ -132,22 +133,39 @@ window.addEventListener('mousemove', (e) => {
     applyTransform();
 });
 
-window.addEventListener('mouseup', () => { setTimeout(() => isDragging = false, 50); });
+// Risoluzione bug "drag infinito": ascoltiamo il rilascio ovunque
+window.addEventListener('mouseup', () => { 
+    isDragging = false; 
+});
 
 // --- GIOCO ---
 function openLevel(placeName) {
     currentLevel = levelsData[placeName];
     const levelImg = document.getElementById('level-image');
     levelImg.src = currentLevel.image;
+    
     document.getElementById('map-screen').classList.add('hidden');
     document.getElementById('level-screen').classList.remove('hidden');
-    document.getElementById('win-back-btn').classList.add('hidden'); // Nascondi bottone vittoria
+    document.getElementById('win-back-btn').classList.add('hidden');
+    
     activeContainer = document.getElementById('level-drag-container');
-    document.getElementById('interactive-objects').innerHTML = ''; // Pulisci vecchi marker
+    const interactiveObjects = document.getElementById('interactive-objects');
+    interactiveObjects.innerHTML = ''; // Svuota i marker visivi
     
     levelImg.onload = () => {
         initCamera(true);
         renderTray();
+        
+        // --- FIX: Ridisegna i cerchietti verdi degli oggetti già trovati ---
+        currentLevel.targets.forEach(t => {
+            if (t.found) {
+                drawMarker(t);
+            }
+        });
+
+        // Controlla se il livello era già finito
+        const remaining = currentLevel.targets.filter(t => !t.found).length;
+        if (remaining === 0) document.getElementById('win-back-btn').classList.remove('hidden');
     };
 }
 
@@ -163,7 +181,6 @@ function renderTray() {
     });
 }
 
-// CLICK LOGIC: TROVA OGGETTI + COPIA COORDINATE (per te)
 document.getElementById('level-image').addEventListener('click', function(e) {
     if (hasMoved) return;
 
@@ -173,12 +190,6 @@ document.getElementById('level-image').addEventListener('click', function(e) {
     const xPct = (clickX / this.offsetWidth) * 100;
     const yPct = (clickY / this.offsetHeight) * 100;
 
-    // --- FUNZIONE COPIA PER TE ---
-    const coords = `top: '${yPct.toFixed(2)}%', left: '${xPct.toFixed(2)}%'`;
-    navigator.clipboard.writeText(coords);
-    console.log("Coordinate copiate:", coords);
-
-    // --- LOGICA GIOCO ---
     currentLevel.targets.forEach(t => {
         if (!t.found) {
             const dist = Math.sqrt(Math.pow(xPct - t.left, 2) + Math.pow(yPct - t.top, 2));
@@ -191,11 +202,7 @@ document.getElementById('level-image').addEventListener('click', function(e) {
 });
 
 function markAsFound(target) {
-    const marker = document.createElement('div');
-    marker.className = 'found-marker';
-    marker.style.left = target.left + "%";
-    marker.style.top = target.top + "%";
-    document.getElementById('interactive-objects').appendChild(marker);
+    drawMarker(target); // Crea il cerchietto verde
 
     const trayItem = document.getElementById(`tray-${target.id}`);
     if (trayItem) trayItem.classList.add('found');
@@ -204,6 +211,15 @@ function markAsFound(target) {
     if (remaining === 0) {
         document.getElementById('win-back-btn').classList.remove('hidden');
     }
+}
+
+// Nuova funzione per disegnare il cerchio verde
+function drawMarker(target) {
+    const marker = document.createElement('div');
+    marker.className = 'found-marker';
+    marker.style.left = target.left + "%";
+    marker.style.top = target.top + "%";
+    document.getElementById('interactive-objects').appendChild(marker);
 }
 
 function closeLevel() {
