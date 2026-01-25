@@ -4,15 +4,15 @@ body {
     background-color: #1a1a1a; text-align: center;
 }
 
-/* --- LOGIN SCREEN ANIMATA --- */
+/* --- LOGIN SCREEN VIVA --- */
 #login-screen {
-    background: linear-gradient(45deg, #ff0000, #b30000, #ff4d4d);
+    background: linear-gradient(-45deg, #ff0055, #ff0000, #ff4d94, #800000);
     background-size: 400% 400%;
-    animation: gradientBG 10s ease infinite;
+    animation: gradientMove 8s ease infinite;
     overflow: hidden;
 }
 
-@keyframes gradientBG {
+@keyframes gradientMove {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
@@ -20,17 +20,33 @@ body {
 
 .heart {
     position: absolute;
-    color: rgba(255, 255, 255, 0.3);
-    font-size: 20px;
+    bottom: -150px;
     user-select: none;
-    animation: floatHeart 6s linear infinite;
+    pointer-events: none;
+    animation: floatUp var(--d) linear infinite;
+    opacity: 0.7;
+    filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
 }
 
-@keyframes floatHeart {
-    0% { transform: translateY(100vh) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+@keyframes floatUp {
+    0% { transform: translateY(0) rotate(0deg) scale(0.5); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translateY(-120vh) rotate(360deg) scale(var(--s)); opacity: 0; }
 }
 
+/* --- MAPPA E ZOOM --- */
+.map-container {
+    position: absolute;
+    top: 0; left: 0;
+    transform-origin: 0 0; /* Fondamentale per far sì che i collider non si spostino */
+    will-change: transform;
+}
+
+/* Cursor fix */
+#map-screen, #level-screen { cursor: grab; }
+body.grabbing { cursor: grabbing !important; }
+
+/* ... resto del CSS (hotspot, buttons, tray) uguale a prima ... */
 /* --- MAPPA E SCHERMI --- */
 .screen {
     position: fixed; top: 0; left: 0;
