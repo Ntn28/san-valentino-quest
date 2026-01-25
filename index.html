@@ -18,25 +18,24 @@
             <input type="text" id="slot-year" maxlength="4" placeholder="AAAA">
         </div>
         <button onclick="checkCode()" style="padding: 10px 30px; cursor:pointer;">ENTRA ❤️</button>
-        <p id="error-msg" class="hidden">Riprova, amore!</p>
     </div>
     
-  <div id="map-screen" class="screen hidden"> 
-    <div class="map-container">
-        <img src="mappa.png" alt="Mappa Torino" class="game-map">
-        
-        <div class="hotspot-trigger" id="spot-mole" onclick="openLevel('mole')"></div>
-        <div class="hotspot-trigger" id="spot-egizio" onclick="openLevel('egizio')"></div>
-        <div class="hotspot-trigger" id="spot-smashy" onclick="openLevel('smashy')"></div>
+    <div id="map-screen" class="screen hidden"> 
+        <div class="map-container">
+            <img src="mappa.png" alt="Mappa Torino" class="game-map" draggable="false">
+            <div class="hotspot-trigger" id="spot-mole" onclick="openLevel('mole')"></div>
+            <div class="hotspot-trigger" id="spot-egizio" onclick="openLevel('egizio')"></div>
+            <div class="hotspot-trigger" id="spot-smashy" onclick="openLevel('smashy')"></div>
+        </div>
     </div>
-</div>
 
-   <div id="level-screen" class="screen hidden">
+    <div id="level-screen" class="screen hidden">
         <button class="back-btn" onclick="closeLevel()">⬅ Torna alla Mappa</button>
         <div class="map-container" id="level-drag-container">
             <img id="level-image" src="" alt="Livello" draggable="false">
             <div id="interactive-objects"></div>
         </div>
+        <button id="win-back-btn" class="hidden" onclick="closeLevel()">BRAVA! Torna alla Mappa ❤️</button>
         <div id="objects-to-find"></div>
     </div>
 
