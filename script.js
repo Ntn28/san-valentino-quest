@@ -10,14 +10,13 @@ const levelsData = {
     'mole': { image: 'mole_interno.png', targets: ["Take a bite", "Cartolina", "Piuma", "Bandiera", "Salvadanaio", "Aereoplanino", "Binocolo", "Pop corn", "Robot", "Cappello", "Lucchetto", "Treno", "Oscar"] }
 };
 
-// --- ANIMAZIONE CUORI ---
+// --- LOGIN & CUORI (Invariati) ---
 function createHearts() {
     const container = document.getElementById('login-screen');
     setInterval(() => {
         if (document.getElementById('login-screen').classList.contains('hidden')) return;
         const heart = document.createElement('div');
-        heart.className = 'heart';
-        heart.innerHTML = '❤️';
+        heart.className = 'heart'; heart.innerHTML = '❤️';
         heart.style.left = Math.random() * 100 + 'vw';
         heart.style.fontSize = Math.random() * 50 + 20 + 'px';
         heart.style.animationDuration = Math.random() * 3 + 4 + 's';
@@ -27,7 +26,6 @@ function createHearts() {
 }
 createHearts();
 
-// --- LOGIN ---
 function checkCode() {
     const d = document.getElementById('slot-day').value;
     const m = document.getElementById('slot-month').value;
@@ -40,7 +38,7 @@ function checkCode() {
     } else { alert("Data errata!"); }
 }
 
-// --- SISTEMA CAMERA ---
+// --- SISTEMA CAMERA CON LOCK ---
 function initCamera(resetZoom = false) {
     if (!activeContainer) return;
     const screenW = window.innerWidth, screenH = window.innerHeight;
@@ -49,11 +47,10 @@ function initCamera(resetZoom = false) {
     let minScale = Math.max(screenW / contW, screenH / contH);
     
     if (resetZoom) {
-        scale = minScale * 1.2; // Parte leggermente zoomato per immersione
+        scale = minScale; // Parte a tutto schermo
         mapX = (screenW - contW * scale) / 2;
         mapY = (screenH - contH * scale) / 2;
     }
-    
     applyTransform();
 }
 
@@ -62,12 +59,10 @@ function applyTransform() {
     const screenW = window.innerWidth, screenH = window.innerHeight;
     const contW = activeContainer.offsetWidth, contH = activeContainer.offsetHeight;
 
-    // Forza scala minima
     let minScale = Math.max(screenW / contW, screenH / contH);
     if (scale < minScale) scale = minScale;
-    if (scale > 6) scale = 6;
+    if (scale > 5) scale = 5; // LOCK MASSIMO
 
-    // Limiti trascinamento
     if (mapX > 0) mapX = 0;
     if (mapX < screenW - contW * scale) mapX = screenW - contW * scale;
     if (mapY > 0) mapY = 0;
@@ -76,41 +71,40 @@ function applyTransform() {
     activeContainer.style.transform = `translate(${mapX}px, ${mapY}px) scale(${scale})`;
 }
 
-// --- EVENTO ZOOM (CORRETTO) ---
 window.addEventListener('wheel', (e) => {
     if (!activeContainer) return;
-    
-    // Blocca lo scroll della pagina
     e.preventDefault();
 
-    const zoomSpeed = 0.15;
+    const zoomSpeed = 0.1;
     const oldScale = scale;
 
-    // Zoom verso il mouse
-    if (e.deltaY < 0) {
-        scale *= (1 + zoomSpeed);
-    } else {
-        scale /= (1 + zoomSpeed);
+    // Calcolo nuova scala con blocco immediato
+    let newScale = e.deltaY < 0 ? scale * (1 + zoomSpeed) : scale / (1 + zoomSpeed);
+    
+    // Limiti scala
+    const screenW = window.innerWidth, screenH = window.innerHeight;
+    let minScale = Math.max(screenW / activeContainer.offsetWidth, screenH / activeContainer.offsetHeight);
+    newScale = Math.min(Math.max(newScale, minScale), 5);
+
+    if (newScale !== oldScale) {
+        const mouseX = e.clientX;
+        const mouseY = e.clientY;
+        const ratio = newScale / oldScale;
+
+        mapX = mouseX - (mouseX - mapX) * ratio;
+        mapY = mouseY - (mouseY - mapY) * ratio;
+        scale = newScale;
+        applyTransform();
     }
-
-    // Calcolo per centrare lo zoom sul mouse
-    const mouseX = e.clientX;
-    const mouseY = e.clientY;
-    const ratio = scale / oldScale;
-
-    mapX = mouseX - (mouseX - mapX) * ratio;
-    mapY = mouseY - (mouseY - mapY) * ratio;
-
-    applyTransform();
 }, { passive: false });
 
-// --- DRAG (FISSA) ---
-function startDrag(e) {
-    if (e.button !== 0) return;
+// --- DRAG ---
+window.addEventListener('mousedown', (e) => {
+    if (!activeContainer || e.button !== 0) return;
     isDragging = true;
     startX = e.clientX - mapX;
     startY = e.clientY - mapY;
-}
+});
 
 window.addEventListener('mousemove', (e) => {
     if (!isDragging || !activeContainer) return;
@@ -119,12 +113,9 @@ window.addEventListener('mousemove', (e) => {
     applyTransform();
 });
 
-window.addEventListener('mouseup', () => { isDragging = false; });
+window.addEventListener('mouseup', () => isDragging = false);
 
-document.getElementById('map-screen').addEventListener('mousedown', startDrag);
-document.getElementById('level-screen').addEventListener('mousedown', startDrag);
-
-// --- LIVELLI & DEBUG ---
+// --- LOGICA LIVELLI ---
 function openLevel(placeName) {
     const data = levelsData[placeName];
     const levelImg = document.getElementById('level-image');
@@ -132,10 +123,8 @@ function openLevel(placeName) {
     
     document.getElementById('map-screen').classList.add('hidden');
     document.getElementById('level-screen').classList.remove('hidden');
-    
     activeContainer = document.getElementById('level-drag-container');
     
-    // Reset totale per il caricamento del livello
     levelImg.onload = () => {
         initCamera(true);
         setupObjects(data.targets);
@@ -156,16 +145,18 @@ function setupObjects(targets) {
     });
 }
 
+// --- DEBUG TOOL ---
 function setupDebug(targets) {
     let panel = document.getElementById('debug-panel') || document.createElement('div');
     panel.id = 'debug-panel';
     document.body.appendChild(panel);
-    panel.innerHTML = '<b>DEBUG ATTIVO</b><br><small>Clicca un nome e poi l\'oggetto</small><hr>';
+    panel.innerHTML = '<b>MODALITÀ DEBUG</b><br><hr>';
     targets.forEach(name => {
         const dObj = document.createElement('div');
         dObj.style.cursor = "pointer";
         dObj.innerText = "• " + name;
-        dObj.onclick = () => {
+        dObj.onclick = (e) => {
+            e.stopPropagation();
             document.querySelectorAll('#debug-panel div').forEach(el => el.style.color = 'white');
             dObj.style.color = '#0f0';
             currentObjectToPlace = name;
@@ -174,8 +165,10 @@ function setupDebug(targets) {
     });
 }
 
-document.getElementById('level-image').onclick = function(e) {
+// Click per registrare posizione
+document.getElementById('level-image').addEventListener('click', function(e) {
     if (!currentObjectToPlace) return;
+
     const rect = this.getBoundingClientRect();
     const x = (e.clientX - rect.left) / scale;
     const y = (e.clientY - rect.top) / scale;
@@ -183,8 +176,16 @@ document.getElementById('level-image').onclick = function(e) {
     const leftPct = ((x / this.offsetWidth) * 100).toFixed(2);
 
     console.log(`{ id: '${currentObjectToPlace.toLowerCase().replace(/ /g, '_')}', name: '${currentObjectToPlace}', top: '${topPct}%', left: '${leftPct}%' },`);
-    alert(`DEBUG: ${currentObjectToPlace} -> T:${topPct}% L:${leftPct}%`);
-};
+    
+    // Crea quadratino visivo di conferma
+    const marker = document.createElement('div');
+    marker.className = 'hotspot-debug';
+    marker.style.top = topPct + "%"; marker.style.left = leftPct + "%";
+    marker.style.width = "40px"; marker.style.height = "40px";
+    document.getElementById('interactive-objects').appendChild(marker);
+    
+    alert(`Posizione registrata per: ${currentObjectToPlace}`);
+});
 
 function closeLevel() {
     document.getElementById('level-screen').classList.add('hidden');
