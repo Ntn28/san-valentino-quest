@@ -10,19 +10,20 @@ const levelsData = {
     'mole': { image: 'mole_interno.png', targets: ["Take a bite", "Cartolina", "Piuma", "Bandiera", "Salvadanaio", "Aereoplanino", "Binocolo", "Pop corn", "Robot", "Cappello", "Lucchetto", "Treno", "Oscar"] }
 };
 
-// --- CUORI GRANDI ---
+// --- ANIMAZIONE CUORI ---
 function createHearts() {
     const container = document.getElementById('login-screen');
     setInterval(() => {
+        if (document.getElementById('login-screen').classList.contains('hidden')) return;
         const heart = document.createElement('div');
         heart.className = 'heart';
         heart.innerHTML = '❤️';
         heart.style.left = Math.random() * 100 + 'vw';
-        heart.style.fontSize = Math.random() * 40 + 20 + 'px'; // Cuori più grandi
-        heart.style.animationDuration = Math.random() * 3 + 5 + 's';
+        heart.style.fontSize = Math.random() * 50 + 20 + 'px';
+        heart.style.animationDuration = Math.random() * 3 + 4 + 's';
         container.appendChild(heart);
-        setTimeout(() => heart.remove(), 8000);
-    }, 400);
+        setTimeout(() => heart.remove(), 7000);
+    }, 300);
 }
 createHearts();
 
@@ -39,31 +40,34 @@ function checkCode() {
     } else { alert("Data errata!"); }
 }
 
-// --- CAMERA (ZOOM VERSO IL MOUSE) ---
-function initCamera(firstTime = false) {
+// --- SISTEMA CAMERA ---
+function initCamera(resetZoom = false) {
     if (!activeContainer) return;
     const screenW = window.innerWidth, screenH = window.innerHeight;
     const contW = activeContainer.offsetWidth, contH = activeContainer.offsetHeight;
 
     let minScale = Math.max(screenW / contW, screenH / contH);
     
-    // Al primo avvio, impostiamo uno zoom del 50% superiore al minimo per non avere l'immagine piccola
-    if (firstTime) scale = minScale * 1.5; 
-    else if (scale < minScale) scale = minScale;
-
+    if (resetZoom) {
+        scale = minScale * 1.2; // Parte leggermente zoomato per immersione
+        mapX = (screenW - contW * scale) / 2;
+        mapY = (screenH - contH * scale) / 2;
+    }
+    
     applyTransform();
 }
 
 function applyTransform() {
+    if (!activeContainer) return;
     const screenW = window.innerWidth, screenH = window.innerHeight;
     const contW = activeContainer.offsetWidth, contH = activeContainer.offsetHeight;
 
-    // Limiti di zoom
+    // Forza scala minima
     let minScale = Math.max(screenW / contW, screenH / contH);
     if (scale < minScale) scale = minScale;
-    if (scale > 5) scale = 5;
+    if (scale > 6) scale = 6;
 
-    // Limiti di movimento
+    // Limiti trascinamento
     if (mapX > 0) mapX = 0;
     if (mapX < screenW - contW * scale) mapX = screenW - contW * scale;
     if (mapY > 0) mapY = 0;
@@ -72,31 +76,36 @@ function applyTransform() {
     activeContainer.style.transform = `translate(${mapX}px, ${mapY}px) scale(${scale})`;
 }
 
-// ZOOM SUL PUNTATORE
+// --- EVENTO ZOOM (CORRETTO) ---
 window.addEventListener('wheel', (e) => {
     if (!activeContainer) return;
+    
+    // Blocca lo scroll della pagina
     e.preventDefault();
 
-    const zoomSpeed = 0.1;
+    const zoomSpeed = 0.15;
     const oldScale = scale;
 
-    // Calcola posizione mouse rispetto al contenitore
+    // Zoom verso il mouse
+    if (e.deltaY < 0) {
+        scale *= (1 + zoomSpeed);
+    } else {
+        scale /= (1 + zoomSpeed);
+    }
+
+    // Calcolo per centrare lo zoom sul mouse
     const mouseX = e.clientX;
     const mouseY = e.clientY;
-
-    if (e.deltaY < 0) scale *= (1 + zoomSpeed);
-    else scale /= (1 + zoomSpeed);
-
-    // Correzione posizione per zoomare sul mouse
     const ratio = scale / oldScale;
+
     mapX = mouseX - (mouseX - mapX) * ratio;
     mapY = mouseY - (mouseY - mapY) * ratio;
 
     applyTransform();
 }, { passive: false });
 
-// DRAG (SENZA RIMANERE APPIZZATO)
-function handleMouseDown(e) {
+// --- DRAG (FISSA) ---
+function startDrag(e) {
     if (e.button !== 0) return;
     isDragging = true;
     startX = e.clientX - mapX;
@@ -112,29 +121,33 @@ window.addEventListener('mousemove', (e) => {
 
 window.addEventListener('mouseup', () => { isDragging = false; });
 
-document.getElementById('map-screen').addEventListener('mousedown', handleMouseDown);
-document.getElementById('level-screen').addEventListener('mousedown', handleMouseDown);
+document.getElementById('map-screen').addEventListener('mousedown', startDrag);
+document.getElementById('level-screen').addEventListener('mousedown', startDrag);
 
 // --- LIVELLI & DEBUG ---
 function openLevel(placeName) {
     const data = levelsData[placeName];
-    document.getElementById('level-image').src = data.image;
+    const levelImg = document.getElementById('level-image');
+    levelImg.src = data.image;
+    
     document.getElementById('map-screen').classList.add('hidden');
     document.getElementById('level-screen').classList.remove('hidden');
+    
     activeContainer = document.getElementById('level-drag-container');
     
-    setTimeout(() => {
-        initCamera(true); // Parte già un po' zoomato
+    // Reset totale per il caricamento del livello
+    levelImg.onload = () => {
+        initCamera(true);
         setupObjects(data.targets);
         setupDebug(data.targets);
-    }, 150);
+    };
 }
 
 function setupObjects(targets) {
     const tray = document.getElementById('objects-to-find');
     tray.innerHTML = '';
     targets.forEach(name => {
-        const id = name.toLowerCase().replace(/ /g, '_');
+        const id = name.toLowerCase().replace(/ /g, '_').replace(/'/g, '');
         const slot = document.createElement('div');
         slot.className = 'target-item';
         slot.id = `tray-${id}`;
@@ -147,11 +160,10 @@ function setupDebug(targets) {
     let panel = document.getElementById('debug-panel') || document.createElement('div');
     panel.id = 'debug-panel';
     document.body.appendChild(panel);
-    panel.innerHTML = '<b>DEBUG MODE</b><br><small>1. Seleziona oggetto<br>2. Clicca sulla mappa</small><hr>';
+    panel.innerHTML = '<b>DEBUG ATTIVO</b><br><small>Clicca un nome e poi l\'oggetto</small><hr>';
     targets.forEach(name => {
         const dObj = document.createElement('div');
         dObj.style.cursor = "pointer";
-        dObj.style.padding = "2px";
         dObj.innerText = "• " + name;
         dObj.onclick = () => {
             document.querySelectorAll('#debug-panel div').forEach(el => el.style.color = 'white');
@@ -162,7 +174,6 @@ function setupDebug(targets) {
     });
 }
 
-// Click per salvare posizione (Debug)
 document.getElementById('level-image').onclick = function(e) {
     if (!currentObjectToPlace) return;
     const rect = this.getBoundingClientRect();
@@ -172,7 +183,7 @@ document.getElementById('level-image').onclick = function(e) {
     const leftPct = ((x / this.offsetWidth) * 100).toFixed(2);
 
     console.log(`{ id: '${currentObjectToPlace.toLowerCase().replace(/ /g, '_')}', name: '${currentObjectToPlace}', top: '${topPct}%', left: '${leftPct}%' },`);
-    alert(`Posizione per "${currentObjectToPlace}" salvata in console!`);
+    alert(`DEBUG: ${currentObjectToPlace} -> T:${topPct}% L:${leftPct}%`);
 };
 
 function closeLevel() {
