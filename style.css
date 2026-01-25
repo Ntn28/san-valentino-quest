@@ -4,15 +4,15 @@ body {
     background-color: #1a1a1a; text-align: center;
 }
 
-/* --- LOGIN SCREEN VIVA --- */
+/* --- LOGIN SCREEN ANIMATA --- */
 #login-screen {
-    background: radial-gradient(circle, #ff4d6d, #c9184a, #800f2f);
-    background-size: 200% 200%;
-    animation: pulseBG 8s ease infinite;
+    background: linear-gradient(45deg, #ff0000, #b30000, #ff4d4d);
+    background-size: 400% 400%;
+    animation: gradientBG 10s ease infinite;
     overflow: hidden;
 }
 
-@keyframes pulseBG {
+@keyframes gradientBG {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
@@ -20,21 +20,18 @@ body {
 
 .heart {
     position: absolute;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 20px;
     user-select: none;
-    pointer-events: none;
-    animation: floatHeart 10s linear infinite;
+    animation: floatHeart 6s linear infinite;
 }
 
 @keyframes floatHeart {
-    0% { transform: translateY(110vh) translateX(0) rotate(0deg); opacity: 0; }
-    20% { opacity: 0.6; }
-    50% { transform: translateY(50vh) translateX(50px) rotate(180deg); }
-    80% { opacity: 0.6; }
-    100% { transform: translateY(-20vh) translateX(-50px) rotate(360deg); opacity: 0; }
+    0% { transform: translateY(100vh) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
 }
 
-/* --- MAPPA E ZOOM --- */
+/* --- MAPPA E SCHERMI --- */
 .screen {
     position: fixed; top: 0; left: 0;
     width: 100vw; height: 100vh;
@@ -48,45 +45,57 @@ body {
 
 .map-container {
     position: absolute; top: 0; left: 0;
-    transform-origin: 0 0; /* Punto di perno per lo zoom */
+    transform-origin: 0 0;
     display: inline-block;
 }
 
 .game-map {
-    display: block;
-    width: auto;
-    height: 100vh; /* Forza l'altezza allo schermo all'inizio */
-    user-select: none;
-    -webkit-user-drag: none;
+    display: block; width: auto; height: 100vh;
+    user-select: none; -webkit-user-drag: none;
 }
 
+/* --- HOTSPOTS (DEBUG VISIBILE) --- */
 .hotspot {
     position: absolute; z-index: 10; cursor: pointer;
-    border: 2px solid red;
-    background-color: rgba(255, 0, 0, 0.2);
+    border: 2px solid cyan; /* Ciano per distinguerli dai trigger dei livelli */
+    background-color: rgba(0, 255, 255, 0.2);
 }
 
-/* BARRA OGGETTI */
+#spot-mole { top: 44.63%; left: 39.75%; width: 150px; height: 150px; border-color: red; }
+#spot-egizio { top: 30%; left: 62.11%; width: 150px; height: 150px; border-color: red; }
+#spot-smashy { top: 71.97%; left: 40.23%; width: 150px; height: 150px; border-color: red; }
+
+/* --- BARRA OGGETTI --- */
 #objects-to-find {
     position: fixed; bottom: 0; width: 100%; height: 120px;
-    background: rgba(255, 255, 255, 0.95);
-    border-top: 3px solid #333;
+    background: rgba(255, 255, 255, 0.9);
+    border-top: 3px solid black;
     display: flex; justify-content: center; align-items: center;
     gap: 15px; z-index: 2000; overflow-x: auto; padding: 0 20px;
 }
 
 .target-item {
-    min-width: 90px; height: 100px;
-    border: 2px dashed #888;
+    min-width: 80px; height: 100px;
+    border: 2px dashed #ccc;
     display: flex; flex-direction: column;
     justify-content: center; align-items: center;
-    transition: 0.3s;
 }
 
-/* DEBUG PANEL */
+.target-item img {
+    max-width: 50px; max-height: 50px; margin-bottom: 5px;
+}
+
+.target-item span { font-size: 10px; font-weight: bold; }
+
+.target-item.found { background-color: #d4edda; border-color: #28a745; opacity: 0.5; }
+
+/* --- DEBUG PANEL --- */
 #debug-panel {
     position: fixed; top: 10px; right: 10px;
-    background: rgba(0,0,0,0.85); color: #0f0;
-    padding: 15px; z-index: 3000; border-radius: 8px;
-    font-family: monospace; font-size: 12px;
+    background: rgba(0,0,0,0.8); color: white;
+    padding: 10px; z-index: 3000; border-radius: 5px;
+    max-height: 80vh; overflow-y: auto; text-align: left;
 }
+.debug-obj { cursor: pointer; padding: 5px; border-bottom: 1px solid #444; }
+.debug-obj:hover { background: #444; }
+.debug-obj.active { background: #007bff; }
