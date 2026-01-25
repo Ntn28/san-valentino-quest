@@ -2,7 +2,7 @@ let isDragging = false;
 let startX, startY;
 let mapX = 0, mapY = 0, scale = 1;
 let activeContainer = null;
-let currentObjectToPlace = null;
+let currentObjectToPlace = null; // Per il Debug
 
 const levelsData = {
     'egizio': {
@@ -19,17 +19,16 @@ const levelsData = {
     }
 };
 
-// --- CUORI GRANDI E VIVI ---
+// --- CUORI ANIMATI ---
 function createHearts() {
     const container = document.getElementById('login-screen');
-    const heartSymbols = ['❤️', '💖', '💝', '💕'];
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 20; i++) {
         const heart = document.createElement('div');
         heart.className = 'heart';
-        heart.innerHTML = heartSymbols[Math.floor(Math.random() * heartSymbols.length)];
+        heart.innerHTML = '❤️';
         heart.style.left = Math.random() * 100 + 'vw';
-        heart.style.animationDelay = Math.random() * 8 + 's';
-        heart.style.fontSize = Math.random() * 30 + 30 + 'px'; // Cuori più grandi
+        heart.style.animationDelay = Math.random() * 5 + 's';
+        heart.style.fontSize = Math.random() * 20 + 10 + 'px';
         container.appendChild(heart);
     }
 }
@@ -48,87 +47,55 @@ function checkCode() {
     } else { alert("Data errata!"); }
 }
 
-// --- SISTEMA CAMERA: ZOOM SUL PUNTATORE ---
-
+// --- CAMERA & DRAG (FIXATO) ---
 function initCamera() {
     if (!activeContainer) return;
-    const screenW = window.innerWidth;
-    const screenH = window.innerHeight;
-    const imgW = activeContainer.offsetWidth;
-    const imgH = activeContainer.offsetHeight;
-
-    // Parte con l'immagine che copre perfettamente l'altezza dello schermo
-    scale = screenH / imgH;
-    mapX = (screenW - imgW * scale) / 2;
-    mapY = 0;
+    const screenW = window.innerWidth, screenH = window.innerHeight;
+    const contW = activeContainer.offsetWidth, contH = activeContainer.offsetHeight;
+    scale = Math.max(screenW / contW, screenH / contH);
+    mapX = (screenW - contW * scale) / 2;
+    mapY = (screenH - contH * scale) / 2;
     applyTransform();
 }
 
 function applyTransform() {
     if (!activeContainer) return;
-    const screenW = window.innerWidth;
-    const screenH = window.innerHeight;
-    const imgW = activeContainer.offsetWidth;
-    const imgH = activeContainer.offsetHeight;
+    const screenW = window.innerWidth, screenH = window.innerHeight;
+    const contW = activeContainer.offsetWidth, contH = activeContainer.offsetHeight;
 
-    // Limiti zoom (minimo per non vedere il nero)
-    let minScale = Math.max(screenW / imgW, screenH / imgH);
-    if (scale < minScale) scale = minScale;
-    if (scale > 5) scale = 5;
-
-    // Limiti trascinamento
+    scale = Math.max(scale, Math.max(screenW / contW, screenH / contH));
     if (mapX > 0) mapX = 0;
+    if (mapX < screenW - contW * scale) mapX = screenW - contW * scale;
     if (mapY > 0) mapY = 0;
-    if (mapX < screenW - imgW * scale) mapX = screenW - imgW * scale;
-    if (mapY < screenH - imgH * scale) mapY = screenH - imgH * scale;
+    if (mapY < screenH - contH * scale) mapY = screenH - contH * scale;
 
     activeContainer.style.transform = `translate(${mapX}px, ${mapY}px) scale(${scale})`;
 }
 
-// ZOOM SUL PUNTATORE MOUSE
-window.addEventListener('wheel', (e) => {
-    if (!activeContainer) return;
-    e.preventDefault();
+// FIX: Usiamo window per il mouseup così se rilasci fuori dall'immagine si ferma
+window.addEventListener('mouseup', () => { 
+    isDragging = false; 
+    document.body.style.cursor = 'default';
+});
 
-    const zoomSpeed = 0.1;
-    const oldScale = scale;
-    
-    // Direzione dello zoom
-    if (e.deltaY < 0) scale *= (1 + zoomSpeed);
-    else scale /= (1 + zoomSpeed);
-
-    // Calcolo per zoomare verso il mouse
-    const mouseX = e.clientX;
-    const mouseY = e.clientY;
-
-    mapX = mouseX - (mouseX - mapX) * (scale / oldScale);
-    mapY = mouseY - (mouseY - mapY) * (scale / oldScale);
-
-    applyTransform();
-}, { passive: false });
-
-// --- DRAG FLUIDO ---
-window.addEventListener('mousedown', (e) => {
-    if (!activeContainer || e.button !== 0) return;
+function handleMouseDown(e) {
+    if (e.button !== 0) return;
     isDragging = true;
     startX = e.clientX - mapX;
     startY = e.clientY - mapY;
-    document.body.style.cursor = 'grabbing';
-});
+}
 
 window.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
+    if (!isDragging || !activeContainer) return;
     mapX = e.clientX - startX;
     mapY = e.clientY - startY;
     applyTransform();
 });
 
-window.addEventListener('mouseup', () => {
-    isDragging = false;
-    document.body.style.cursor = 'default';
-});
+document.getElementById('map-screen').addEventListener('mousedown', handleMouseDown);
+document.getElementById('level-screen').addEventListener('mousedown', handleMouseDown);
 
-// --- LIVELLI & DEBUG (INVARIATO) ---
+// --- LOGICA LIVELLI & DEBUG ---
 function openLevel(placeName) {
     const data = levelsData[placeName];
     document.getElementById('level-image').src = data.image;
@@ -151,38 +118,55 @@ function setupObjects(targets) {
         const slot = document.createElement('div');
         slot.className = 'target-item';
         slot.id = `tray-${id}`;
+        // Qui caricherà l'immagine con lo stesso nome dell'oggetto
         slot.innerHTML = `<img src="assets/${id}.png" onerror="this.src='https://via.placeholder.com/50?text=?'"><span>${name}</span>`;
         tray.appendChild(slot);
     });
 }
 
+// --- STRUMENTO DI DEBUG PER COLLIDER ---
 function setupDebug(targets) {
     let panel = document.getElementById('debug-panel');
     if (!panel) {
-        panel = document.createElement('div'); panel.id = 'debug-panel';
+        panel = document.createElement('div');
+        panel.id = 'debug-panel';
         document.body.appendChild(panel);
     }
-    panel.innerHTML = '<h3>Debug Mode</h3><p>Seleziona e clicca sulla mappa:</p>';
+    panel.innerHTML = '<h3>Debug: Clicca un nome e poi sulla mappa</h3>';
     targets.forEach(name => {
         const dObj = document.createElement('div');
-        dObj.style.cursor = "pointer"; dObj.innerText = name;
+        dObj.className = 'debug-obj';
+        dObj.innerText = name;
         dObj.onclick = () => {
+            document.querySelectorAll('.debug-obj').forEach(el => el.classList.remove('active'));
+            dObj.classList.add('active');
             currentObjectToPlace = name;
-            dObj.style.color = "yellow";
         };
         panel.appendChild(dObj);
     });
 }
 
+// Cliccando sulla mappa del livello mentre un oggetto è selezionato nel debug
 document.getElementById('level-image').onclick = function(e) {
     if (!currentObjectToPlace) return;
+
     const rect = this.getBoundingClientRect();
     const x = (e.clientX - rect.left) / scale;
     const y = (e.clientY - rect.top) / scale;
+
     const topPct = ((y / this.offsetHeight) * 100).toFixed(2);
     const leftPct = ((x / this.offsetWidth) * 100).toFixed(2);
-    console.log(`{ id: '${currentObjectToPlace.toLowerCase()}', name: '${currentObjectToPlace}', top: '${topPct}%', left: '${leftPct}%' },`);
-    alert("Salvato in console!");
+
+    console.log(`Oggetto: ${currentObjectToPlace} -> top: ${topPct}%, left: ${leftPct}%`);
+    alert(`Salvato ${currentObjectToPlace}!\nControlla la console (F12) per il codice.`);
+    
+    // Crea un collider visibile temporaneo
+    const temp = document.createElement('div');
+    temp.className = 'hotspot';
+    temp.style.top = topPct + "%";
+    temp.style.left = leftPct + "%";
+    temp.style.width = "40px"; temp.style.height = "40px";
+    document.getElementById('interactive-objects').appendChild(temp);
 };
 
 function closeLevel() {
