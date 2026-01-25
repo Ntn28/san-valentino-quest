@@ -19,6 +19,7 @@ const levelsData = {
             { id: 'lucchetto', name: 'Lucchetto', top: 21.63, left: 69.77 },
             { id: 'treno', name: 'Treno', top: 12.47, left: 62.16 },
             { id: 'oscar', name: 'Oscar', top: 50.62, left: 2.50 }
+            // Qui aggiungeremo Binocolo e Film appena mi passi le coordinate!
         ]
     },
     'smashy': {
@@ -62,7 +63,7 @@ const levelsData = {
     }
 };
 
-// --- CORE ENGINE ---
+// --- CAMERA ENGINE (Fixato per mappe indipendenti) ---
 function checkCode() {
     const d = document.getElementById('slot-day').value;
     const m = document.getElementById('slot-month').value;
@@ -101,7 +102,7 @@ function applyTransform() {
     activeContainer.style.transform = `translate(${mapX}px, ${mapY}px) scale(${scale})`;
 }
 
-// Zoom e Drag (stessa logica fluida precedente)
+// Eventi Mouse
 window.addEventListener('wheel', (e) => {
     if (!activeContainer) return;
     e.preventDefault();
@@ -126,22 +127,23 @@ window.addEventListener('mousedown', (e) => {
 
 window.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
-    if (Math.abs(e.clientX - (startX + mapX)) > 5) hasMoved = true;
+    if (Math.abs(e.clientX - (startX + mapX)) > 5 || Math.abs(e.clientY - (startY + mapY)) > 5) hasMoved = true;
     mapX = e.clientX - startX; mapY = e.clientY - startY;
     applyTransform();
 });
 
-window.addEventListener('mouseup', () => { isDragging = false; });
+window.addEventListener('mouseup', () => { setTimeout(() => isDragging = false, 50); });
 
-// --- LOGICA DI GIOCO ---
+// --- GIOCO ---
 function openLevel(placeName) {
     currentLevel = levelsData[placeName];
     const levelImg = document.getElementById('level-image');
     levelImg.src = currentLevel.image;
-    
     document.getElementById('map-screen').classList.add('hidden');
     document.getElementById('level-screen').classList.remove('hidden');
+    document.getElementById('win-back-btn').classList.add('hidden'); // Nascondi bottone vittoria
     activeContainer = document.getElementById('level-drag-container');
+    document.getElementById('interactive-objects').innerHTML = ''; // Pulisci vecchi marker
     
     levelImg.onload = () => {
         initCamera(true);
@@ -161,7 +163,7 @@ function renderTray() {
     });
 }
 
-// CLICK PER TROVARE OGGETTI
+// CLICK LOGIC: TROVA OGGETTI + COPIA COORDINATE (per te)
 document.getElementById('level-image').addEventListener('click', function(e) {
     if (hasMoved) return;
 
@@ -171,11 +173,16 @@ document.getElementById('level-image').addEventListener('click', function(e) {
     const xPct = (clickX / this.offsetWidth) * 100;
     const yPct = (clickY / this.offsetHeight) * 100;
 
-    // Controllo se il click è vicino a un oggetto (tolleranza 3%)
+    // --- FUNZIONE COPIA PER TE ---
+    const coords = `top: '${yPct.toFixed(2)}%', left: '${xPct.toFixed(2)}%'`;
+    navigator.clipboard.writeText(coords);
+    console.log("Coordinate copiate:", coords);
+
+    // --- LOGICA GIOCO ---
     currentLevel.targets.forEach(t => {
         if (!t.found) {
             const dist = Math.sqrt(Math.pow(xPct - t.left, 2) + Math.pow(yPct - t.top, 2));
-            if (dist < 3.5) { // Raggio di cattura
+            if (dist < 3.5) { 
                 t.found = true;
                 markAsFound(t);
             }
@@ -184,21 +191,18 @@ document.getElementById('level-image').addEventListener('click', function(e) {
 });
 
 function markAsFound(target) {
-    // 1. Effetto grafico sulla mappa
     const marker = document.createElement('div');
     marker.className = 'found-marker';
     marker.style.left = target.left + "%";
     marker.style.top = target.top + "%";
     document.getElementById('interactive-objects').appendChild(marker);
 
-    // 2. Effetto sulla barra
     const trayItem = document.getElementById(`tray-${target.id}`);
     if (trayItem) trayItem.classList.add('found');
 
-    // 3. Controllo vittoria livello
     const remaining = currentLevel.targets.filter(t => !t.found).length;
     if (remaining === 0) {
-        setTimeout(() => alert("Complimenti! Hai trovato tutto in questo luogo! ❤️"), 500);
+        document.getElementById('win-back-btn').classList.remove('hidden');
     }
 }
 
