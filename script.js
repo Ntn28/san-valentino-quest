@@ -65,16 +65,36 @@ const levelsData = {
     }
 };
 
+function createHeart() {
+    const container = document.getElementById('hearts-container');
+    if (!container || document.getElementById('login-screen').classList.contains('hidden')) return;
+
+    const heart = document.createElement('div');
+    heart.className = 'heart';
+    heart.innerHTML = '❤️';
+    heart.style.left = Math.random() * 100 + 'vw';
+    heart.style.animationDuration = (Math.random() * 3 + 2) + 's';
+    heart.style.fontSize = (Math.random() * 20 + 10) + 'px';
+    
+    container.appendChild(heart);
+    
+    setTimeout(() => { heart.remove(); }, 5000);
+}
+
+// Funzione checkCode aggiornata con il tuo messaggio
 function checkCode() {
     const d = document.getElementById('slot-day').value;
     const m = document.getElementById('slot-month').value;
     const y = document.getElementById('slot-year').value;
+    
     if (d === "12" && m === "08" && y === "2024") {
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('map-screen').classList.remove('hidden');
         activeContainer = document.querySelector('#map-screen .map-container');
         setTimeout(() => initCamera(true), 100);
-    } else { alert("Data errata!"); }
+    } else { 
+        alert("DAVVERO?? 😡😡😡"); // MESSAGGIO CAMBIATO
+    }
 }
 
 function initCamera(resetZoom = false) {
