@@ -37,7 +37,7 @@ const levelsData = {
             { id: 'conchiglia', name: 'Conchiglia', top: 8.85, left: 60.95 },
             { id: 'portachiavi', name: 'Portachiavi', top: 18.36, left: 36.72 },
             { id: 'smashy', name: 'Smashy', top: 45.29, left: 53.85 },
-            { id: 'piuma', name: 'Piuma', top: 0, left: 0 } // INCOLLA QUI LE COORDINATE QUANDO LE HAI
+            { id: 'piuma', name: 'Piuma', top: 43.32, left: 80.52 } // INCOLLA QUI LE COORDINATE QUANDO LE HAI
         ]
     },
     'egizio': {
