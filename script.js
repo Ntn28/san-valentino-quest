@@ -1,4 +1,5 @@
 let isDragging = false;
+let hasMoved = false; // Nuova variabile per distinguere click da drag
 let startX, startY;
 let mapX = 0, mapY = 0, scale = 1;
 let activeContainer = null;
@@ -38,16 +39,14 @@ function checkCode() {
     } else { alert("Data errata!"); }
 }
 
-// --- SISTEMA CAMERA CON LOCK ---
+// --- CAMERA ---
 function initCamera(resetZoom = false) {
     if (!activeContainer) return;
     const screenW = window.innerWidth, screenH = window.innerHeight;
     const contW = activeContainer.offsetWidth, contH = activeContainer.offsetHeight;
-
     let minScale = Math.max(screenW / contW, screenH / contH);
-    
     if (resetZoom) {
-        scale = minScale; // Parte a tutto schermo
+        scale = minScale;
         mapX = (screenW - contW * scale) / 2;
         mapY = (screenH - contH * scale) / 2;
     }
@@ -58,39 +57,27 @@ function applyTransform() {
     if (!activeContainer) return;
     const screenW = window.innerWidth, screenH = window.innerHeight;
     const contW = activeContainer.offsetWidth, contH = activeContainer.offsetHeight;
-
     let minScale = Math.max(screenW / contW, screenH / contH);
-    if (scale < minScale) scale = minScale;
-    if (scale > 5) scale = 5; // LOCK MASSIMO
-
+    scale = Math.min(Math.max(scale, minScale), 5);
     if (mapX > 0) mapX = 0;
     if (mapX < screenW - contW * scale) mapX = screenW - contW * scale;
     if (mapY > 0) mapY = 0;
     if (mapY < screenH - contH * scale) mapY = screenH - contH * scale;
-
     activeContainer.style.transform = `translate(${mapX}px, ${mapY}px) scale(${scale})`;
 }
 
 window.addEventListener('wheel', (e) => {
     if (!activeContainer) return;
     e.preventDefault();
-
     const zoomSpeed = 0.1;
     const oldScale = scale;
-
-    // Calcolo nuova scala con blocco immediato
     let newScale = e.deltaY < 0 ? scale * (1 + zoomSpeed) : scale / (1 + zoomSpeed);
-    
-    // Limiti scala
     const screenW = window.innerWidth, screenH = window.innerHeight;
     let minScale = Math.max(screenW / activeContainer.offsetWidth, screenH / activeContainer.offsetHeight);
     newScale = Math.min(Math.max(newScale, minScale), 5);
-
     if (newScale !== oldScale) {
-        const mouseX = e.clientX;
-        const mouseY = e.clientY;
+        const mouseX = e.clientX, mouseY = e.clientY;
         const ratio = newScale / oldScale;
-
         mapX = mouseX - (mouseX - mapX) * ratio;
         mapY = mouseY - (mouseY - mapY) * ratio;
         scale = newScale;
@@ -98,33 +85,38 @@ window.addEventListener('wheel', (e) => {
     }
 }, { passive: false });
 
-// --- DRAG ---
+// --- GESTIONE DRAG VS CLICK ---
 window.addEventListener('mousedown', (e) => {
     if (!activeContainer || e.button !== 0) return;
     isDragging = true;
+    hasMoved = false; // Resettiamo il movimento
     startX = e.clientX - mapX;
     startY = e.clientY - mapY;
 });
 
 window.addEventListener('mousemove', (e) => {
     if (!isDragging || !activeContainer) return;
+    // Se muoviamo il mouse di più di 5 pixel, consideralo un trascinamento
+    if (Math.abs(e.clientX - (startX + mapX)) > 5 || Math.abs(e.clientY - (startY + mapY)) > 5) {
+        hasMoved = true;
+    }
     mapX = e.clientX - startX;
     mapY = e.clientY - startY;
     applyTransform();
 });
 
-window.addEventListener('mouseup', () => isDragging = false);
+window.addEventListener('mouseup', () => {
+    setTimeout(() => { isDragging = false; }, 50); // Piccolo delay per non triggerare click
+});
 
 // --- LOGICA LIVELLI ---
 function openLevel(placeName) {
     const data = levelsData[placeName];
     const levelImg = document.getElementById('level-image');
     levelImg.src = data.image;
-    
     document.getElementById('map-screen').classList.add('hidden');
     document.getElementById('level-screen').classList.remove('hidden');
     activeContainer = document.getElementById('level-drag-container');
-    
     levelImg.onload = () => {
         initCamera(true);
         setupObjects(data.targets);
@@ -145,29 +137,31 @@ function setupObjects(targets) {
     });
 }
 
-// --- DEBUG TOOL ---
+// --- DEBUG TOOL MIGLIORATO ---
 function setupDebug(targets) {
     let panel = document.getElementById('debug-panel') || document.createElement('div');
     panel.id = 'debug-panel';
     document.body.appendChild(panel);
-    panel.innerHTML = '<b>MODALITÀ DEBUG</b><br><hr>';
+    panel.innerHTML = '<b>DEBUG MODE</b><br><small>Seleziona un nome per attivare il click</small><hr>';
     targets.forEach(name => {
         const dObj = document.createElement('div');
+        dObj.className = 'debug-obj-item';
         dObj.style.cursor = "pointer";
         dObj.innerText = "• " + name;
         dObj.onclick = (e) => {
             e.stopPropagation();
-            document.querySelectorAll('#debug-panel div').forEach(el => el.style.color = 'white');
+            document.querySelectorAll('.debug-obj-item').forEach(el => el.style.color = 'white');
             dObj.style.color = '#0f0';
-            currentObjectToPlace = name;
+            currentObjectToPlace = name; // Attiva il puntatore per questo oggetto
         };
         panel.appendChild(dObj);
     });
 }
 
-// Click per registrare posizione
+// Click sulla scena per salvare
 document.getElementById('level-image').addEventListener('click', function(e) {
-    if (!currentObjectToPlace) return;
+    // SE sto trascinando O NON ho selezionato un oggetto dalla lista, NON FARE NULLA
+    if (hasMoved || !currentObjectToPlace) return;
 
     const rect = this.getBoundingClientRect();
     const x = (e.clientX - rect.left) / scale;
@@ -177,14 +171,18 @@ document.getElementById('level-image').addEventListener('click', function(e) {
 
     console.log(`{ id: '${currentObjectToPlace.toLowerCase().replace(/ /g, '_')}', name: '${currentObjectToPlace}', top: '${topPct}%', left: '${leftPct}%' },`);
     
-    // Crea quadratino visivo di conferma
     const marker = document.createElement('div');
     marker.className = 'hotspot-debug';
     marker.style.top = topPct + "%"; marker.style.left = leftPct + "%";
-    marker.style.width = "40px"; marker.style.height = "40px";
+    marker.style.width = "30px"; marker.style.height = "30px";
+    marker.style.transform = "translate(-50%, -50%)"; // Centra il marker nel punto esatto
     document.getElementById('interactive-objects').appendChild(marker);
     
-    alert(`Posizione registrata per: ${currentObjectToPlace}`);
+    alert(`Salvato: ${currentObjectToPlace}`);
+
+    // RESET: Dopo il salvataggio, devi cliccare un altro oggetto dalla lista per salvare ancora
+    currentObjectToPlace = null;
+    document.querySelectorAll('.debug-obj-item').forEach(el => el.style.color = 'white');
 });
 
 function closeLevel() {
