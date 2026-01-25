@@ -48,7 +48,7 @@ const levelsData = {
             { id: 'cofanetto', name: 'Cofanetto', top: 24.68, left: 6.78 },
             { id: 'obelisco', name: 'Obelisco', top: 47.65, left: 18.73 },
             { id: 'piuma', name: 'Piuma', top: 66.65, left: 34.37 },
-            { id: 'stela_antonino', name: 'Stela di Antonino', top: 76.63, left: 46.33 },
+            { id: 'stela_d_antonino', name: 'Stela di Antonino', top: 76.63, left: 46.33 },
             { id: 'moneta_argento', name: "Moneta d'Argento", top: 58.90, left: 77.87 },
             { id: 'moneta_oro', name: "Moneta d'Oro", top: 88.91, left: 46.80 },
             { id: 'bussola', name: 'Bussola', top: 40.43, left: 62.02 },
