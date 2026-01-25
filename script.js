@@ -19,8 +19,8 @@ const levelsData = {
             { id: 'lucchetto', name: 'Lucchetto', top: 21.63, left: 69.77 },
             { id: 'treno', name: 'Treno', top: 12.47, left: 62.16 },
             { id: 'oscar', name: 'Oscar', top: 50.62, left: 2.50 },
-            { id: 'binocolo', name: 'Binocolo', top: 25.84, left: 79.81 }, // AGGIUNTO
-            { id: 'film', name: 'Film', top: 87.17, left: 92.77 }          // AGGIUNTO
+            { id: 'binocolo', name: 'Binocolo', top: 25.84, left: 79.81 },
+            { id: 'film', name: 'Film', top: 87.17, left: 92.77 }
         ]
     },
     'smashy': {
@@ -36,7 +36,8 @@ const levelsData = {
             { id: 'mascotte_smashy', name: 'Mascotte Smashy', top: 7.74, left: 78.07 },
             { id: 'conchiglia', name: 'Conchiglia', top: 8.85, left: 60.95 },
             { id: 'portachiavi', name: 'Portachiavi', top: 18.36, left: 36.72 },
-            { id: 'smashy', name: 'Smashy', top: 45.29, left: 53.85 }
+            { id: 'smashy', name: 'Smashy', top: 45.29, left: 53.85 },
+            { id: 'piuma', name: 'Piuma', top: 0, left: 0 } // INCOLLA QUI LE COORDINATE QUANDO LE HAI
         ]
     },
     'egizio': {
@@ -64,7 +65,6 @@ const levelsData = {
     }
 };
 
-// --- CAMERA ENGINE ---
 function checkCode() {
     const d = document.getElementById('slot-day').value;
     const m = document.getElementById('slot-month').value;
@@ -96,14 +96,17 @@ function applyTransform() {
     const contW = activeContainer.offsetWidth, contH = activeContainer.offsetHeight;
     let minScale = Math.max(screenW / contW, screenH / contH);
     scale = Math.min(Math.max(scale, minScale), 5);
+    
+    // Limiti trascinamento
     if (mapX > 0) mapX = 0;
     if (mapX < screenW - contW * scale) mapX = screenW - contW * scale;
     if (mapY > 0) mapY = 0;
     if (mapY < screenH - contH * scale) mapY = screenH - contH * scale;
+    
     activeContainer.style.transform = `translate(${mapX}px, ${mapY}px) scale(${scale})`;
 }
 
-// Eventi Mouse - AGGIUNTO window per il mouseup così non si incastra
+// ZOOM
 window.addEventListener('wheel', (e) => {
     if (!activeContainer) return;
     e.preventDefault();
@@ -120,25 +123,33 @@ window.addEventListener('wheel', (e) => {
     applyTransform();
 }, { passive: false });
 
+// TRASCINAMENTO (Fixato per evitare blocchi)
 window.addEventListener('mousedown', (e) => {
     if (!activeContainer || e.button !== 0) return;
-    isDragging = true; hasMoved = false;
-    startX = e.clientX - mapX; startY = e.clientY - mapY;
+    // Evita che il browser provi a trascinare l'immagine come file
+    if(e.target.tagName === 'IMG') e.preventDefault(); 
+    
+    isDragging = true; 
+    hasMoved = false;
+    startX = e.clientX - mapX; 
+    startY = e.clientY - mapY;
 });
 
 window.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
-    if (Math.abs(e.clientX - (startX + mapX)) > 5 || Math.abs(e.clientY - (startY + mapY)) > 5) hasMoved = true;
-    mapX = e.clientX - startX; mapY = e.clientY - startY;
+    if (Math.abs(e.clientX - (startX + mapX)) > 5 || Math.abs(e.clientY - (startY + mapY)) > 5) {
+        hasMoved = true;
+    }
+    mapX = e.clientX - startX; 
+    mapY = e.clientY - startY;
     applyTransform();
 });
 
-// Risoluzione bug "drag infinito": ascoltiamo il rilascio ovunque
 window.addEventListener('mouseup', () => { 
     isDragging = false; 
 });
 
-// --- GIOCO ---
+// GIOCO
 function openLevel(placeName) {
     currentLevel = levelsData[placeName];
     const levelImg = document.getElementById('level-image');
@@ -150,20 +161,12 @@ function openLevel(placeName) {
     
     activeContainer = document.getElementById('level-drag-container');
     const interactiveObjects = document.getElementById('interactive-objects');
-    interactiveObjects.innerHTML = ''; // Svuota i marker visivi
+    interactiveObjects.innerHTML = ''; 
     
     levelImg.onload = () => {
         initCamera(true);
         renderTray();
-        
-        // --- FIX: Ridisegna i cerchietti verdi degli oggetti già trovati ---
-        currentLevel.targets.forEach(t => {
-            if (t.found) {
-                drawMarker(t);
-            }
-        });
-
-        // Controlla se il livello era già finito
+        currentLevel.targets.forEach(t => { if (t.found) drawMarker(t); });
         const remaining = currentLevel.targets.filter(t => !t.found).length;
         if (remaining === 0) document.getElementById('win-back-btn').classList.remove('hidden');
     };
@@ -190,6 +193,10 @@ document.getElementById('level-image').addEventListener('click', function(e) {
     const xPct = (clickX / this.offsetWidth) * 100;
     const yPct = (clickY / this.offsetHeight) * 100;
 
+    // COPIA COORDINATE NEGLI APPUNTI (Per te)
+    const coords = `top: '${yPct.toFixed(2)}%', left: '${xPct.toFixed(2)}%'`;
+    navigator.clipboard.writeText(coords);
+
     currentLevel.targets.forEach(t => {
         if (!t.found) {
             const dist = Math.sqrt(Math.pow(xPct - t.left, 2) + Math.pow(yPct - t.top, 2));
@@ -202,18 +209,13 @@ document.getElementById('level-image').addEventListener('click', function(e) {
 });
 
 function markAsFound(target) {
-    drawMarker(target); // Crea il cerchietto verde
-
+    drawMarker(target);
     const trayItem = document.getElementById(`tray-${target.id}`);
     if (trayItem) trayItem.classList.add('found');
-
     const remaining = currentLevel.targets.filter(t => !t.found).length;
-    if (remaining === 0) {
-        document.getElementById('win-back-btn').classList.remove('hidden');
-    }
+    if (remaining === 0) document.getElementById('win-back-btn').classList.remove('hidden');
 }
 
-// Nuova funzione per disegnare il cerchio verde
 function drawMarker(target) {
     const marker = document.createElement('div');
     marker.className = 'found-marker';
