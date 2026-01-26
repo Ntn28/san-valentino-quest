@@ -147,3 +147,22 @@ body {
     border: 5px solid #00ff00; border-radius: 50%;
     pointer-events: none; z-index: 100; transform: translate(-50%, -50%);
 }
+
+.level-check {
+    position: absolute;
+    font-size: 80px;       /* Grandezza della spunta */
+    z-index: 30;           /* Sopra gli hotspot */
+    pointer-events: none;  /* Così puoi cliccare attraverso di essi se necessario */
+    filter: drop-shadow(0 0 10px rgba(0,0,0,0.8)); /* Ombra per vederli meglio */
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Posizioni (Uguali agli hotspot ma centrati visivamente) */
+#check-mole { top: 48%; left: 42%; }
+#check-egizio { top: 34%; left: 65%; }
+#check-smashy { top: 75%; left: 43%; }
+
+@keyframes popIn {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
