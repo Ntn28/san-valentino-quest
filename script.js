@@ -1,10 +1,168 @@
+Che idea fantastica! Aggiungere la musica e i checkmark renderà il gioco molto più "vivo" e soddisfacente.
+
+Ecco come procedere. Dobbiamo modificare HTML, CSS e JavaScript.
+
+1. Prepara i file Audio
+Prima di iniziare, assicurati di avere 5 file mp3 nella tua cartella (o in una sottocartella audio/). Chiamali così per comodità:
+
+login.mp3 (Schermata iniziale)
+
+map.mp3 (Mappa Torino)
+
+mole.mp3
+
+egizio.mp3
+
+smashy.mp3
+
+2. HTML (index.html)
+Qui aggiungiamo due cose:
+
+I tag Audio nascosti.
+
+I Checkmark (spunte) sopra i luoghi della mappa (nascosti all'inizio).
+
+Sostituisci il tuo HTML con questo (ho aggiunto i commenti dove ho fatto modifiche):
+
+HTML
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💘Torino The 3 Hidden Map💘</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <audio id="audio-login" loop src="audio/login.mp3"></audio>
+    <audio id="audio-map" loop src="audio/map.mp3"></audio>
+    <audio id="audio-mole" loop src="audio/mole.mp3"></audio>
+    <audio id="audio-egizio" loop src="audio/egizio.mp3"></audio>
+    <audio id="audio-smashy" loop src="audio/smashy.mp3"></audio>
+
+    <div id="login-screen" class="screen active" onclick="startLoginMusic()">
+        <div id="hearts-container"></div>
+
+        <h1 style="color: white; text-shadow: 2px 4px 10px rgba(0,0,0,0.5); font-size: 2rem; margin-bottom: 30px; z-index: 10;">Inserisci il codice segreto🤔</h1>
+        
+        <div class="input-group" style="z-index: 10;">
+            <input type="text" id="slot-day" maxlength="2" placeholder="io">
+            <span style="color:white; font-size: 1.5rem; margin: 0 10px;">/</span>
+            <input type="text" id="slot-month" maxlength="2" placeholder="ti">
+            <span style="color:white; font-size: 1.5rem; margin: 0 10px;">/</span>
+            <input type="text" id="slot-year" maxlength="4" placeholder="mangio">
+        </div>
+        
+        <button onclick="checkCode()" class="modern-button">Dai su</button>
+    </div>
+    
+    <div id="map-screen" class="screen hidden"> 
+        <div class="map-container">
+            <img src="mappa.png" alt="Mappa Torino" class="game-map" draggable="false">
+            
+            <div class="hotspot-trigger" id="spot-mole" onclick="openLevel('mole')"></div>
+            <div class="hotspot-trigger" id="spot-egizio" onclick="openLevel('egizio')"></div>
+            <div class="hotspot-trigger" id="spot-smashy" onclick="openLevel('smashy')"></div>
+
+            <div class="level-check hidden" id="check-mole">✅</div>
+            <div class="level-check hidden" id="check-egizio">✅</div>
+            <div class="level-check hidden" id="check-smashy">✅</div>
+        </div>
+    </div>
+
+    <div id="level-screen" class="screen hidden">
+        <button class="back-btn" onclick="closeLevel()">⬅ Torna alla Mappa</button>
+        <div class="map-container" id="level-drag-container">
+            <img id="level-image" src="" alt="Livello" draggable="false">
+            <div id="interactive-objects"></div>
+        </div>
+        <button id="win-back-btn" class="hidden" onclick="closeLevel()">BRAVAAA PUPISSSSSS</button>
+        <div id="objects-to-find"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+3. CSS (style.css)
+Aggiungi questo stile alla fine del tuo file CSS per posizionare le spunte verdi sopra gli edifici.
+
+CSS
+/* ... tutto il tuo codice precedente ... */
+
+/* Stile per i Checkmark sulla mappa */
+.level-check {
+    position: absolute;
+    font-size: 80px;       /* Grandezza della spunta */
+    z-index: 30;           /* Sopra gli hotspot */
+    pointer-events: none;  /* Così puoi cliccare attraverso di essi se necessario */
+    filter: drop-shadow(0 0 10px rgba(0,0,0,0.8)); /* Ombra per vederli meglio */
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Posizioni (Uguali agli hotspot ma centrati visivamente) */
+#check-mole { top: 48%; left: 42%; }
+#check-egizio { top: 34%; left: 65%; }
+#check-smashy { top: 75%; left: 43%; }
+
+@keyframes popIn {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+4. JavaScript (script.js)
+Qui c'è la logica. Ho aggiunto:
+
+Il sistema audio che spegne la canzone precedente e accende quella nuova.
+
+Il controllo per mostrare il checkmark quando torni alla mappa.
+
+Una funzione per avviare la musica al primo click (i browser bloccano l'audio automatico se l'utente non interagisce).
+
+Copia tutto questo nel file JS:
+
+JavaScript
+// --- CONFIGURAZIONE AUDIO ---
+const audioTracks = {
+    login: document.getElementById('audio-login'),
+    map: document.getElementById('audio-map'),
+    mole: document.getElementById('audio-mole'),
+    egizio: document.getElementById('audio-egizio'),
+    smashy: document.getElementById('audio-smashy')
+};
+
+function playMusic(trackKey) {
+    // Ferma tutte le tracce
+    Object.values(audioTracks).forEach(track => {
+        track.pause();
+        track.currentTime = 0; // Riavvia da capo se vuoi, o togli questa riga per pausa/resume
+    });
+    // Avvia quella richiesta
+    if (audioTracks[trackKey]) {
+        audioTracks[trackKey].play().catch(e => console.log("Aspetta interazione utente"));
+    }
+}
+
+// Funzione per far partire la musica al primo click sulla pagina di login
+// (Necessario perché i browser bloccano l'autoplay)
+function startLoginMusic() {
+    if (document.getElementById('login-screen').classList.contains('active')) {
+        // Controlla se sta già suonando per non riavviarla
+        if (audioTracks.login.paused) {
+            audioTracks.login.play();
+        }
+    }
+}
+
+// --- VARIABILI GIOCO ---
 let isDragging = false, hasMoved = false;
 let startX, startY, mapX = 0, mapY = 0, scale = 1;
 let activeContainer = null;
+let currentLevelName = null; // Serve per sapere quale checkmark attivare
 let currentLevel = null;
 
 const levelsData = {
     'mole': {
+        completed: false, // Aggiunto stato completamento
         image: 'mole_interno.png',
         targets: [
             { id: 'take_bite', name: 'Take a bite', top: 51.42, left: 42.42 },
@@ -24,6 +182,7 @@ const levelsData = {
         ]
     },
     'smashy': {
+        completed: false,
         image: 'smashy_interno.png',
         targets: [
             { id: 'toro', name: 'Toro', top: 27.04, left: 1.46 },
@@ -37,10 +196,11 @@ const levelsData = {
             { id: 'conchiglia', name: 'Conchiglia', top: 8.85, left: 60.95 },
             { id: 'portachiavi', name: 'Portachiavi', top: 18.36, left: 36.72 },
             { id: 'smashy', name: 'Smashy', top: 45.29, left: 53.85 },
-            { id: 'piuma', name: 'Piuma', top: 43.32, left: 80.52 } // INCOLLA QUI LE COORDINATE QUANDO LE HAI
+            { id: 'piuma', name: 'Piuma', top: 43.32, left: 80.52 } 
         ]
     },
     'egizio': {
+        completed: false,
         image: 'egizio_interno.png',
         targets: [
             { id: 'ciondolo', name: 'Ciondolo', top: 87.96, left: 1.33 },
@@ -65,6 +225,8 @@ const levelsData = {
     }
 };
 
+// --- ANIMAZIONE CUORI LOGIN ---
+setInterval(createHeart, 300);
 function createHeart() {
     const container = document.getElementById('hearts-container');
     if (!container || document.getElementById('login-screen').classList.contains('hidden')) return;
@@ -75,13 +237,11 @@ function createHeart() {
     heart.style.left = Math.random() * 100 + 'vw';
     heart.style.animationDuration = (Math.random() * 3 + 2) + 's';
     heart.style.fontSize = (Math.random() * 20 + 10) + 'px';
-    
     container.appendChild(heart);
-    
     setTimeout(() => { heart.remove(); }, 5000);
 }
 
-// Funzione checkCode aggiornata con il tuo messaggio
+// --- FUNZIONI LOGIN ---
 function checkCode() {
     const d = document.getElementById('slot-day').value;
     const m = document.getElementById('slot-month').value;
@@ -91,9 +251,12 @@ function checkCode() {
         document.getElementById('login-screen').classList.add('hidden');
         document.getElementById('map-screen').classList.remove('hidden');
         activeContainer = document.querySelector('#map-screen .map-container');
+        
+        playMusic('map'); // PARTE MUSICA MAPPA
+        
         setTimeout(() => initCamera(true), 100);
     } else { 
-        alert("DAVVERO?? 😡😡😡"); // MESSAGGIO CAMBIATO
+        alert("DAVVERO?? 😡😡😡"); 
     }
 }
 
