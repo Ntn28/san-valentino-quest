@@ -8,7 +8,13 @@
 </head>
 <body>
 
-    <div id="login-screen" class="screen active">
+    <audio id="audio-login" loop src="audio/login.mp3"></audio>
+    <audio id="audio-map" loop src="audio/map.mp3"></audio>
+    <audio id="audio-mole" loop src="audio/mole.mp3"></audio>
+    <audio id="audio-egizio" loop src="audio/egizio.mp3"></audio>
+    <audio id="audio-smashy" loop src="audio/smashy.mp3"></audio>
+
+    <div id="login-screen" class="screen active" onclick="startLoginMusic()">
         <div id="hearts-container"></div>
 
         <h1 style="color: white; text-shadow: 2px 4px 10px rgba(0,0,0,0.5); font-size: 2rem; margin-bottom: 30px; z-index: 10;">Inserisci il codice segreto🤔</h1>
@@ -27,9 +33,14 @@
     <div id="map-screen" class="screen hidden"> 
         <div class="map-container">
             <img src="mappa.png" alt="Mappa Torino" class="game-map" draggable="false">
+            
             <div class="hotspot-trigger" id="spot-mole" onclick="openLevel('mole')"></div>
             <div class="hotspot-trigger" id="spot-egizio" onclick="openLevel('egizio')"></div>
             <div class="hotspot-trigger" id="spot-smashy" onclick="openLevel('smashy')"></div>
+
+            <div class="level-check hidden" id="check-mole">✅</div>
+            <div class="level-check hidden" id="check-egizio">✅</div>
+            <div class="level-check hidden" id="check-smashy">✅</div>
         </div>
     </div>
 
