@@ -19,13 +19,22 @@ function playMusic(trackId) {
         currentAudio = newTrack;
         // Il play deve essere gestito con catch per evitare errori dei browser
         currentAudio.play().catch(e => console.log("Audio play bloccato finché l'utente non interagisce"));
+  } else {
+        console.error("Audio non trovato: " + trackId);
+    }
+}
+
+// Questa funzione serve per sbloccare l'audio sui browser (Chrome/Safari) al primo click
+function startLoginMusic() {
+    if (!currentAudio || currentAudio.id !== 'bgm-login') {
+        playMusic('bgm-login');
     }
 }
 
 // Avvia musica Login al primo click sulla pagina (per policy browser)
-window.addEventListener('click', () => {
-    if (!currentAudio) playMusic('bgm-login');
-}, { once: true });
+//window.addEventListener('click', () => {
+//    if (!currentAudio) playMusic('bgm-login');
+//}, { once: true });
 
 
 const levelsData = {
